@@ -1,0 +1,293 @@
+@import "tailwindcss";
+
+/* ----------------------------------------------------------------------------
+   Family Wall Calendar — Vista 1
+   Estetica: "panel de salidas editorial" calido. Casi-negro templado, tipografia
+   grande y segura para leerse a 3-4 m, color por persona como unico acento vivo.
+---------------------------------------------------------------------------- */
+
+:root {
+  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+
+  --color-bg: #15120d;
+  --color-surface: #1f1b14;
+  --color-surface-2: #262017;
+  --color-line: rgba(245, 239, 226, 0.09);
+  --color-line-strong: rgba(245, 239, 226, 0.16);
+  --color-text: #f4efe6;
+  --color-dim: #9d9482;
+  --color-now: #e9b44c;
+  --color-ok: #84c08a;
+  --color-warn: #e1924a;
+
+  --day-col-compact-w: 3.2rem;   /* ancho de la card de un dia vacio encogido (7 dias) */
+}
+
+* { box-sizing: border-box; }
+
+html {
+  /* Escala segun el ancho del monitor (1080p y mayores). */
+  font-size: clamp(15px, 0.62vw + 8px, 23px);
+}
+
+html, body, #root { height: 100%; margin: 0; }
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background:
+    radial-gradient(120% 80% at 85% -10%, rgba(233, 180, 76, 0.10), transparent 60%),
+    radial-gradient(90% 70% at 0% 110%, rgba(120, 150, 200, 0.06), transparent 55%),
+    var(--color-bg);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  cursor: default;
+}
+
+.font-display { font-family: var(--font-display); }
+.text-dim { color: var(--color-dim); }
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* ---- Layout general ---- */
+
+.app {
+  height: 100dvh;        /* altura de viewport explicita, no dependemos de la cadena de % */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;      /* guarda final: nada se sale del viewport */
+}
+
+.board {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  /* minmax(0, …) en vez de 1fr: permite que las pistas encojan por debajo de su
+     contenido (1fr = minmax(auto, 1fr), y el 'auto'/min-content impide encoger). */
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 22vw, 380px);
+  grid-template-rows: minmax(0, 1fr) clamp(220px, 32vh, 360px);
+  gap: 1rem;
+  padding: 0 1.6rem 1.6rem;
+}
+.board-main { grid-column: 1; grid-row: 1; min-height: 0; }
+.board-side { grid-column: 2; grid-row: 1; min-height: 0; }
+.board-week { grid-column: 1 / span 2; grid-row: 2; min-height: 0; }
+
+/* ---- Paneles ---- */
+
+.panel {
+  background: linear-gradient(180deg, var(--color-surface-2), var(--color-surface));
+  border: 1px solid var(--color-line);
+  border-radius: 18px;
+  padding: 1.1rem 1.3rem 1.2rem;
+  box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+}
+.panel-title {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-dim);
+  margin-bottom: 0.9rem;
+}
+
+/* ---- Header ---- */
+
+.clock {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 3.6rem;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+}
+.clock-colon { animation: blink 2s steps(1) infinite; opacity: 0.85; }
+@keyframes blink { 50% { opacity: 0.25; } }
+
+/* ---- Timeline de hoy ---- */
+
+.hour-row { position: absolute; left: 0; right: 0; height: 0; }
+.hour-label {
+  position: absolute; left: 0; top: -0.62em;
+  font-size: 0.86rem; color: var(--color-dim); width: 2.6rem; text-align: left;
+}
+.hour-line {
+  position: absolute; left: 3.2rem; right: 0; top: 0;
+  border-top: 1px solid var(--color-line);
+}
+
+.allday-chip {
+  font-size: 1rem; font-weight: 600;
+  padding: 0.35rem 0.7rem; border-radius: 8px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.event-block {
+  position: absolute;
+  border-radius: 9px;
+  padding: 0.3rem 0.55rem;
+  overflow: hidden;
+  backdrop-filter: blur(2px);
+  display: flex; flex-direction: column; gap: 1px;
+}
+.event-time { font-size: 0.82rem; color: var(--color-dim); font-weight: 500; }
+.event-title { font-size: 1.12rem; font-weight: 600; line-height: 1.1; }
+.event-loc { font-size: 0.84rem; color: var(--color-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.now-line {
+  position: absolute; left: 3.2rem; right: 0; height: 0;
+  border-top: 2px solid var(--color-now);
+  box-shadow: 0 0 14px rgba(233, 180, 76, 0.5);
+  z-index: 5;
+}
+.now-dot {
+  position: absolute; left: -5px; top: -5px;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--color-now);
+  box-shadow: 0 0 12px var(--color-now);
+}
+
+/* ---- Rejilla 7 dias ---- */
+
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.6rem;
+  min-height: 0;
+}
+.day-col {
+  display: flex; flex-direction: column;
+  background: rgba(245, 239, 226, 0.02);
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  padding: 0.55rem 0.55rem 0.4rem;
+  min-height: 0; overflow: hidden;
+}
+.day-col-weekend { background: rgba(233, 180, 76, 0.05); }
+.day-col-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 0.5rem; padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--color-line);
+}
+.day-dow { font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-dim); }
+.day-num { font-family: var(--font-display); font-size: 1.55rem; font-weight: 700; line-height: 1; }
+
+/* Columna de dia vacio encogida (solo dia + numero, centrados en vertical). */
+.day-col-compact { padding: 0.55rem 0.2rem; }
+.day-col-compact .day-col-head {
+  flex-direction: column; align-items: center; gap: 0.15rem;
+  justify-content: flex-start;
+  margin-bottom: 0; padding-bottom: 0; border-bottom: none;
+}
+.day-col-compact .day-dow { font-size: 0.72rem; }
+.day-col-compact .day-num { font-size: 1.3rem; }
+.day-events { flex: 1 1 0; display: flex; flex-direction: column; gap: 0.25rem; overflow: hidden; min-height: 0; }
+.day-pill {
+  flex-shrink: 0;            /* no encoger: si no caben, las recorta el truncado medido (no se aplastan los titulos) */
+  border-radius: 6px; padding: 0.2rem 0.5rem;
+  display: flex; flex-direction: row; align-items: baseline; gap: 0.4rem;  /* hora + titulo en una linea */
+  overflow: hidden;
+}
+.day-pill-time { font-size: 0.82rem; color: var(--color-dim); font-weight: 500; flex-shrink: 0; }
+.day-pill-title {
+  font-size: 0.95rem; font-weight: 600; line-height: 1.2;
+  flex: 1 1 auto; min-width: 0;   /* min-width:0 -> el ellipsis funciona dentro del flex-row */
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.day-more { font-size: 0.8rem; color: var(--color-dim); padding-left: 0.45rem; }
+
+/* ---- Mini-mes ---- */
+
+.mini-dow {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  text-align: center; font-size: 0.78rem; color: var(--color-dim);
+  margin-bottom: 0.4rem;
+}
+.mini-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: 1fr; gap: 2px; min-height: 0;
+}
+.mini-cell {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  border-radius: 9px; font-size: 1rem;
+}
+.mini-num { line-height: 1; }
+.mini-out .mini-num { color: rgba(157, 148, 130, 0.4); }
+.mini-today { background: var(--color-now); color: #1a140a; font-weight: 700; }
+.mini-today .mini-num { color: #1a140a; }
+.mini-dots {
+  position: absolute; bottom: 4px; left: 0; right: 0;
+  display: flex; justify-content: center; gap: 3px;
+}
+.mini-dots > span { width: 5px; height: 5px; border-radius: 50%; }
+.mini-today .mini-dots > span { box-shadow: 0 0 0 1px rgba(26, 20, 10, 0.4); }
+
+.view-tag {
+  font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--color-now); font-weight: 600; margin-top: 0.15rem;
+}
+
+/* ---- Vista 2: ano linear ---- */
+
+.year {
+  flex: 1; min-height: 0; overflow: hidden;
+  display: flex; flex-direction: column;
+  padding: 0 1.6rem 1.2rem;
+  --year-label-w: 2.7rem;
+  --year-num-h: 0.74rem;    /* franja del numero arriba de la celda */
+  --year-lane-h: 0.7rem;    /* alto de cada carril de barra de evento */
+}
+.year .panel-title { margin: 0.3rem 0 0.6rem; }
+
+.year-head { display: flex; height: 1.3rem; flex: 0 0 auto; }
+.year-body { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
+.year-row { display: flex; flex: 1 1 0; min-height: 0; }
+
+.year-label { width: var(--year-label-w); flex: 0 0 auto; display: flex; align-items: center; }
+.year-month {
+  font-family: var(--font-display); font-weight: 700; text-transform: uppercase;
+  font-size: 0.8rem; letter-spacing: 0.03em; color: var(--color-dim);
+}
+
+.year-track { position: relative; flex: 1 1 0; min-width: 0; overflow: hidden; }
+/* borde fuerte = separacion entre meses; sub-fila inferior con linea tenue */
+.year-row-first .year-track { border-top: 1px solid var(--color-line-strong); }
+.year-row:not(.year-row-first) .year-track { border-top: 1px solid var(--color-line); }
+.year-head .year-track { border-top: none; }
+.year-grid { position: absolute; inset: 0; display: grid; }
+
+.year-dow {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; color: var(--color-dim);
+}
+.year-dow.year-weekend { color: var(--color-now); }
+
+.year-cell {
+  position: relative;
+  border-right: 1px solid var(--color-line);
+  overflow: hidden;
+}
+.year-weekend { background: rgba(233, 180, 76, 0.06); }
+.year-cell-out { background: rgba(0, 0, 0, 0.22); }
+.year-num {
+  position: absolute; top: 1px; left: 3px;
+  font-size: 0.66rem; line-height: 1; color: var(--color-dim);
+}
+.year-today { box-shadow: inset 0 0 0 2px var(--color-now); }
+.year-today .year-num { color: var(--color-text); font-weight: 700; }
+
+.year-bar {
+  position: absolute;
+  height: calc(var(--year-lane-h) - 2px);
+  border-radius: 3px;
+}
+
+/* ---- Animacion de entrada ---- */
+
+.reveal { animation: revealUp 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+@keyframes revealUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}

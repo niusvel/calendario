@@ -1,0 +1,21 @@
+# Entorno virtual de Python
+.venv/
+venv/
+env/
+
+# Bytecode / caches
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Configuracion PRIVADA: contiene las URLs reales de iCloud (webcal://).
+# NO debe subirse al repositorio.
+config.yaml
+
+# Export de datos personales de la familia. NO subir.
+family-calendar-export.md
+
+# Variables de entorno
+.env
+.env.*

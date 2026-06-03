@@ -1,0 +1,6 @@
+brew install python@3.12          # si no tienes Python 3.10+
+cd calendar-api
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+# crea config.yaml con tus calendarios (name, color, url webcal://)
+uvicorn main:app --host 127.0.0.1 --port 8000
