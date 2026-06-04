@@ -5,7 +5,7 @@ import Header from "./components/Header.jsx";
 import TodayTimeline from "./components/TodayTimeline.jsx";
 import WeekGrid from "./components/WeekGrid.jsx";
 import MiniMonth from "./components/MiniMonth.jsx";
-import YearLinear from "./components/YearLinear.jsx";
+import QuarterView from "./components/QuarterView.jsx";
 import MonthFull from "./components/MonthFull.jsx";
 
 const REFRESH_MS = 60_000;        // re-consulta al backend cada minuto
@@ -22,13 +22,12 @@ export default function App() {
 
   async function load() {
     const today = startOfDay(new Date());
-    // Union de la ventana de la Vista 1 (mini-mes + 7 dias) y la Vista 2 (ano natural).
-    const v1from = addDays(new Date(today.getFullYear(), today.getMonth(), 1), -7);
+    // from: inicio del mes actual - 7 (cubre el mini-mes y la Vista 1).
+    const from = addDays(new Date(today.getFullYear(), today.getMonth(), 1), -7);
+    // to: la Vista 3 muestra mes actual + 2 siguientes -> ultimo dia de (mes+2).
+    const quarterEnd = new Date(today.getFullYear(), today.getMonth() + 3, 0);
     const v1to = addDays(today, 45);
-    const yearStart = new Date(today.getFullYear(), 0, 1);
-    const yearEnd = new Date(today.getFullYear(), 11, 31);
-    const from = yearStart < v1from ? yearStart : v1from;
-    const to = yearEnd > v1to ? yearEnd : v1to;
+    const to = v1to > quarterEnd ? v1to : quarterEnd;
     try {
       const data = await fetchEvents(from, to);
       setEvents(data.events || []);
@@ -90,7 +89,7 @@ export default function App() {
       {view === 2 ? (
         <MonthFull now={now} events={events} />
       ) : view === 3 ? (
-        <YearLinear now={now} events={events} />
+        <QuarterView now={now} events={events} />
       ) : (
         <main className="board">
           <div className="board-main">

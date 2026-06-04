@@ -1,14 +1,15 @@
 import { useMemo } from "react";
 import {
-  WEEKDAYS_MINI, MONTHS_SHORT, daysInMonth, mondayOffset,
+  WEEKDAYS_MINI, MONTHS_LONG, MONTHS_SHORT, daysInMonth, mondayOffset,
   eventDayRange, startOfDay, sameDay,
 } from "../lib/dates.js";
 
-// Cada mes se parte en DOS sub-filas de SPLIT columnas (3 semanas) -> menos
-// columnas = celdas mas anchas. El desplazamiento de 21 (=3 semanas) preserva la
-// alineacion de dia de semana, asi que las bandas de finde siguen verticales.
-const SPLIT = 21;
-const MAX_LANES = 2; // carriles de evento por sub-fila (las filas son mas bajas)
+// 3 meses (actual + 2 siguientes). Cada mes se reparte en filas de SPLIT columnas
+// (2 semanas); el mes ocupa tantas filas como necesite. Menos datos en pantalla =
+// celdas grandes y legibles. El shift de 14 (=2·7) preserva la alineacion de dia
+// de semana, asi las bandas de finde quedan verticales.
+const SPLIT = 14;
+const MAX_LANES = 3; // carriles de evento por fila
 
 function tint(hex, alpha = "40") {
   return /^#[0-9a-fA-F]{6}$/.test(hex) ? hex + alpha : hex;
@@ -16,7 +17,6 @@ function tint(hex, alpha = "40") {
 
 const isWeekendCol = (c) => c % 7 === 5 || c % 7 === 6; // col 0 = lunes
 
-// Empaqueta barras (con startCol/endCol) en carriles sin solapamiento (greedy).
 function packLanes(items) {
   const sorted = [...items].sort((a, b) => a.startCol - b.startCol || a.endCol - b.endCol);
   const laneEnds = [];
@@ -29,41 +29,52 @@ function packLanes(items) {
   return sorted;
 }
 
-export default function YearLinear({ now, events }) {
-  const year = now.getFullYear();
+export default function QuarterView({ now, events }) {
+  const baseYear = now.getFullYear();
+  const baseMonth = now.getMonth();
 
-  // 24 sub-filas (12 meses × 2). Cada una con sus barras ya empaquetadas.
-  const rows = useMemo(() => {
-    const out = [];
-    for (let m = 0; m < 12; m++) {
-      const offset = mondayOffset(year, m);
-      const dim = daysInMonth(year, m);
-      const monthStart = new Date(year, m, 1);
-      const monthEnd = new Date(year, m, dim);
-      for (let r = 0; r < 2; r++) {
-        // dias (1-based) que caen en esta sub-fila (segun la columna global).
+  const { subRows, title } = useMemo(() => {
+    const subRows = [];
+    let first = null, last = null;
+    for (let i = 0; i < 3; i++) {
+      const d = new Date(baseYear, baseMonth + i, 1);  // maneja el cambio de año
+      const y = d.getFullYear();
+      const m = d.getMonth();
+      const offset = mondayOffset(y, m);
+      const dim = daysInMonth(y, m);
+      const nRows = Math.ceil((offset + dim) / SPLIT);
+      const monthStart = new Date(y, m, 1);
+      const monthEnd = new Date(y, m, dim);
+      if (i === 0) first = { y, m };
+      if (i === 2) last = { y, m };
+
+      for (let r = 0; r < nRows; r++) {
+        // rango de dias (1-based) que caen en esta fila
         const domLo = Math.max(1, r * SPLIT - offset + 1);
         const domHi = Math.min(dim, r * SPLIT + SPLIT - 1 - offset + 1);
         const items = [];
         if (domLo <= domHi) {
           for (const ev of events) {
             const [s, e] = eventDayRange(ev);
-            if (e < monthStart || s > monthEnd) continue;       // no toca el mes
+            if (e < monthStart || s > monthEnd) continue;
             const cs = Math.max(domLo, s < monthStart ? 1 : s.getDate());
             const ce = Math.min(domHi, e > monthEnd ? dim : e.getDate());
-            if (cs > ce) continue;                              // no toca esta mitad
+            if (cs > ce) continue;
             items.push({
-              id: `${ev.id}-${m}-${r}`, color: ev.color, title: ev.title,
+              id: `${ev.id}-${y}-${m}-${r}`, color: ev.color, title: ev.title,
               startCol: offset + cs - 1 - r * SPLIT,
               endCol: offset + ce - 1 - r * SPLIT,
             });
           }
         }
-        out.push({ m, r, offset, dim, bars: packLanes(items) });
+        subRows.push({ y, m, r, offset, dim, isFirst: r === 0, bars: packLanes(items) });
       }
     }
-    return out;
-  }, [year, events]);
+    const title = first.y === last.y
+      ? `${MONTHS_LONG[first.m]} – ${MONTHS_LONG[last.m]} ${last.y}`
+      : `${MONTHS_LONG[first.m]} ${first.y} – ${MONTHS_LONG[last.m]} ${last.y}`;
+    return { subRows, title };
+  }, [baseYear, baseMonth, events]);
 
   const colPct = 100 / SPLIT;
   const today = startOfDay(now);
@@ -71,9 +82,9 @@ export default function YearLinear({ now, events }) {
 
   return (
     <section className="year reveal">
-      <div className="panel-title">{year} · año</div>
+      <div className="panel-title">{title}</div>
 
-      {/* Cabecera de columnas: L M X J V S D (×3 semanas) */}
+      {/* Cabecera: L M X J V S D (×2 semanas) */}
       <div className="year-head">
         <div className="year-label" />
         <div className="year-track">
@@ -87,17 +98,16 @@ export default function YearLinear({ now, events }) {
         </div>
       </div>
 
-      {/* 24 sub-filas (2 por mes) */}
       <div className="year-body">
-        {rows.map(({ m, r, offset, dim, bars }) => (
-          <div key={`${m}-${r}`} className={"year-row" + (r === 0 ? " year-row-first" : "")}>
-            <div className="year-label year-month">{r === 0 ? MONTHS_SHORT[m] : ""}</div>
+        {subRows.map((row, idx) => (
+          <div key={idx} className={"year-row" + (row.isFirst ? " year-row-first" : "")}>
+            <div className="year-label year-month">{row.isFirst ? MONTHS_SHORT[row.m] : ""}</div>
             <div className="year-track">
               <div className="year-grid" style={gridCols}>
                 {Array.from({ length: SPLIT }, (_, c) => {
-                  const dom = r * SPLIT + c - offset + 1;
-                  const valid = dom >= 1 && dom <= dim;
-                  const isToday = valid && sameDay(new Date(year, m, dom), today);
+                  const dom = row.r * SPLIT + c - row.offset + 1;
+                  const valid = dom >= 1 && dom <= row.dim;
+                  const isToday = valid && sameDay(new Date(row.y, row.m, dom), today);
                   return (
                     <div
                       key={c}
@@ -113,7 +123,7 @@ export default function YearLinear({ now, events }) {
                   );
                 })}
               </div>
-              {bars.filter((it) => it.lane < MAX_LANES).map((it) => (
+              {row.bars.filter((it) => it.lane < MAX_LANES).map((it) => (
                 <div
                   key={it.id}
                   className="year-bar"
@@ -125,7 +135,9 @@ export default function YearLinear({ now, events }) {
                     background: tint(it.color, "40"),
                     borderLeft: `3px solid ${it.color}`,
                   }}
-                />
+                >
+                  <span className="year-bar-label">{it.title}</span>
+                </div>
               ))}
             </div>
           </div>

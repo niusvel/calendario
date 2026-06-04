@@ -13,8 +13,7 @@ __pycache__/
 # NO debe subirse al repositorio.
 config.yaml
 
-# Export de datos personales de la familia. NO subir.
-family-calendar-export.md
+# (El export privado de la familia se ignora globalmente en el .gitignore raiz.)
 
 # Variables de entorno
 .env
