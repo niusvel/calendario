@@ -52,7 +52,8 @@ export default function Header({ now, calendars, status, lastUpdated, view = 1 }
           <div className="font-display" style={{ fontSize: "1.7rem", fontWeight: 700, letterSpacing: "-0.01em" }}>
             {capFirst(fmtLongDate(now))}
           </div>
-          {view === 2 && <div className="view-tag">Vista 2 · año linear</div>}
+          {view === 2 && <div className="view-tag">Vista 2 · mes completo</div>}
+          {view === 3 && <div className="view-tag">Vista 3 · año linear</div>}
         </div>
       </div>
 

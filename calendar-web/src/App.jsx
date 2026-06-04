@@ -6,9 +6,10 @@ import TodayTimeline from "./components/TodayTimeline.jsx";
 import WeekGrid from "./components/WeekGrid.jsx";
 import MiniMonth from "./components/MiniMonth.jsx";
 import YearLinear from "./components/YearLinear.jsx";
+import MonthFull from "./components/MonthFull.jsx";
 
 const REFRESH_MS = 60_000;        // re-consulta al backend cada minuto
-const AUTO_RETURN_MS = 60_000;    // vuelve solo a la Vista 1 tras N s sin pulsar
+const ROTATE_MS = 60_000;         // rota a la siguiente vista cada minuto
 
 export default function App() {
   const [events, setEvents] = useState([]);
@@ -49,20 +50,29 @@ export default function App() {
     };
   }, []);
 
-  // Conmutador de vistas (teclas 1/2/3) + auto-retorno a la Vista 1.
-  const returnTimer = useRef(null);
+  // Rotacion automatica de vistas (1 -> 2 -> 3 -> 1) cada ROTATE_MS, mas control
+  // manual con teclas 1/2/3. Una pulsacion manual reinicia el minuto, de modo que
+  // la vista elegida se ve un minuto completo antes de seguir rotando.
+  const rotateTimer = useRef(null);
   useEffect(() => {
+    const arm = () => {
+      clearTimeout(rotateTimer.current);
+      rotateTimer.current = setTimeout(() => {
+        setView((v) => (v % 3) + 1);   // 1->2->3->1
+        arm();                          // re-programa la siguiente rotacion
+      }, ROTATE_MS);
+    };
     const onKey = (e) => {
-      const v = { "1": 1, "2": 2 }[e.key];   // (3 reservado para la Vista 3)
+      const v = { "1": 1, "2": 2, "3": 3 }[e.key];
       if (!v) return;
       setView(v);
-      clearTimeout(returnTimer.current);
-      if (v !== 1) returnTimer.current = setTimeout(() => setView(1), AUTO_RETURN_MS);
+      arm();   // reinicia el minuto desde la seleccion manual
     };
+    arm();     // arranca la rotacion
     window.addEventListener("keydown", onKey);
     return () => {
       window.removeEventListener("keydown", onKey);
-      clearTimeout(returnTimer.current);
+      clearTimeout(rotateTimer.current);
     };
   }, []);
 
@@ -78,6 +88,8 @@ export default function App() {
     <div className="app">
       <Header now={now} calendars={calendars} status={status} lastUpdated={lastUpdated} view={view} />
       {view === 2 ? (
+        <MonthFull now={now} events={events} />
+      ) : view === 3 ? (
         <YearLinear now={now} events={events} />
       ) : (
         <main className="board">

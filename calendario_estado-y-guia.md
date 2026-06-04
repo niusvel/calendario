@@ -7,8 +7,10 @@
 > diagnóstico y fix concreto), el roadmap priorizado y las decisiones técnicas a
 > preservar. No hace falta contexto previo.
 >
-> **Estado:** los issues de la §5 (viewport, last-updated, capitalización) están
-> RESUELTOS y verificados. La tarea inmediata es ahora la §6.B (Vista 2).
+> **Estado:** §5 resuelta y las **tres vistas implementadas** — Vista 1 (dashboard),
+> Vista 2 (mes completo), Vista 3 (año linear) — con rotación automática cada minuto
+> y control manual por teclas. Lo pendiente es montaje/refinamiento (§6.C botón
+> físico, §6.E barras multi-día, §6.F brillo, §6.G backend, §6.H kiosk).
 
 ---
 
@@ -90,7 +92,7 @@ publicados (CUMPLES, FAMILY, LEYA, NAIARA, NIUSVEL, NIUSVELITO).
 | --- | --- |
 | `main.py` | App FastAPI. `lifespan` hace una carga inicial y lanza un loop de refresco cada `refresh_minutes`. Cache en memoria por calendario (`LAST_GOOD`). **Resiliencia:** si un feed falla, conserva sus últimos eventos buenos y marca el error en `/health` (no rompe el dashboard). Endpoints: `GET /` (info), `GET /health`, `GET /events`. CORS abierto a propósito (localhost/LAN). `_normalize_color()` antepone `#` a colores sin él (evita que el navegador los descarte). |
 | `calendar_source.py` | `fetch_ics` (convierte `webcal://`→`https://`, httpx async), parseo con `icalendar`, **expansión de recurrencias** con `recurring_ical_events.of(cal).between(start, end)` (RRULE/RDATE/EXDATE y ediciones puntuales — `icalendar` solo NO lo hace), y normalización de cada ocurrencia a dict. Zona horaria `Europe/Madrid`; los all-day se anclan a medianoche local. |
-| `config.yaml` | Configuración (gitignored, sin plantilla). `refresh_minutes` (10), `window_past_days` (**400**, cubre el año natural para la Vista 2), `window_future_days` (400), y `calendars: [{name, color, url}]`. |
+| `config.yaml` | Configuración (gitignored, sin plantilla). `refresh_minutes` (10), `window_past_days` (**400**, cubre el año natural para la Vista 3), `window_future_days` (400), y `calendars: [{name, color, url}]`. |
 | `requirements.txt` | fastapi, uvicorn[standard], httpx, icalendar, recurring-ical-events, PyYAML, tzdata. |
 | `test_smoke.py` | Test sin red: valida expansión de un semanal con EXDATE, un all-day multi-día y un evento puntual. **Pasa.** |
 | `README.md` | Instalación, cómo publicar el calendario iCloud, arranque, notas (latencia, resiliencia). |
@@ -114,12 +116,13 @@ Stack: **React 18 + Vite 6 + Tailwind v4** (plugin `@tailwindcss/vite` + `@impor
 | Fichero | Contenido |
 | --- | --- |
 | `src/main.jsx` | Punto de entrada: monta `<App/>` en `#root` (React 18 `createRoot` + `StrictMode`) e importa `index.css`. |
-| `src/App.jsx` | Estado `events/status/lastUpdated/now/view`. `load()` pide `/events` con la **unión** de la ventana Vista 1 (`primerDíaDelMes - 7` … `hoy + 45`) y la Vista 2 (`1 ene … 31 dic` del año natural). Intervalos: refetch cada 60 s + reloj cada 1 s. Deriva la leyenda de personas. **Conmutador de vistas**: teclas `1`/`2` (3 reservada) + **auto-retorno** a la Vista 1 tras `AUTO_RETURN_MS` (60 s). Render condicional: `view===2` → `YearLinear`, si no el board. |
+| `src/App.jsx` | Estado `events/status/lastUpdated/now/view`. `load()` pide `/events` con la **unión** de la ventana Vista 1 (`primerDíaDelMes - 7` … `hoy + 45`) y el año natural (`1 ene … 31 dic`, para la Vista 3). Intervalos: refetch cada 60 s + reloj cada 1 s. Deriva la leyenda de personas. **Rotación automática** de vistas `1→2→3→1` cada `ROTATE_MS` (60 s) + **control manual** con teclas `1`/`2`/`3` (una pulsación reinicia el minuto). Render: `view===2` → `MonthFull` (mes), `view===3` → `YearLinear` (año), si no el board. |
 | `src/components/Header.jsx` | Reloj en vivo `HH:MM`, fecha (capitalizada con `capFirst`), leyenda por persona (cuadro de color + nombre) y `StatusDot` con la línea `Actualizado HH:MM · ● ONLINE · hace T` (ver §5.2). |
 | `src/components/TodayTimeline.jsx` | Panel "Hoy": franja de todo-el-día arriba + rejilla horaria con eventos como bloques (con **algoritmo de carriles** para solapamientos) + **línea de la hora actual**. Ventana horaria adaptativa (mín 08, máx 22, se expande si hay eventos fuera). |
 | `src/components/WeekGrid.jsx` | Panel "Próximos 7 días" (empieza **mañana**). Pills de **una línea** (hora + título, ellipsis) coloreadas; fin de semana resaltado; **truncado medido** por columna (cuántas caben + "+N más", `useLayoutEffect` + `ResizeObserver`); **ancho de columna adaptativo**: un día vacío se encoge a `--day-col-compact-w` si un vecino tiene eventos, cediendo ancho a los días ocupados (si nadie tiene eventos, 7 columnas iguales). |
 | `src/components/MiniMonth.jsx` | Mini-mes del mes actual (lunes-primero), hoy resaltado, hasta 3 puntos de color en días con eventos. |
-| `src/components/YearLinear.jsx` | **Vista 2 "año linear"**: cada mes se parte en **2 sub-filas** de `SPLIT = 21` columnas (3 semanas) → 24 sub-filas × 21 cols (celdas más anchas que el formato de 37). Días **alineados por día de semana** (`mondayOffset`); el shift de 21 = 3·7 preserva la alineación, así las **bandas de finde** (col % 7 ∈ {5,6}) siguen verticales. Cabecera `L M X J V S D` (×3), número por día, celda de **hoy** resaltada. Eventos como **barras horizontales** (color = calendario) en carriles (`MAX_LANES = 2`; un evento que cruza el corte de 21 aparece en ambas sub-filas; el exceso de carriles no se pinta — ver §6.E). |
+| `src/components/YearLinear.jsx` | **Vista 3 "año linear"**: cada mes se parte en **2 sub-filas** de `SPLIT = 21` columnas (3 semanas) → 24 sub-filas × 21 cols (celdas más anchas que el formato de 37). Días **alineados por día de semana** (`mondayOffset`); el shift de 21 = 3·7 preserva la alineación, así las **bandas de finde** (col % 7 ∈ {5,6}) siguen verticales. Cabecera `L M X J V S D` (×3), número por día, celda de **hoy** resaltada. Eventos como **barras horizontales** (color = calendario) en carriles (`MAX_LANES = 2`; un evento que cruza el corte de 21 aparece en ambas sub-filas; el exceso de carriles no se pinta — ver §6.E). |
+| `src/components/MonthFull.jsx` | **Vista 2 "mes completo"**: calendario grande del mes actual (lunes-primero) vía `monthMatrix`. 7 cols × 5–6 semanas; cada celda = número + pills de evento (hora + título) con **truncado medido** (`useLayoutEffect` + `ResizeObserver`) + "+N más". Hoy resaltado, bandas de finde, días de otro mes atenuados (`.mf-out`), color = calendario. |
 | `src/lib/dates.js` | Helpers: parseo **all-day vs con hora** (clave: all-day como fecha LOCAL para evitar off-by-one), nombres en español, `monthMatrix`, `layoutLanes`, `coversDay`, `eventsOnDay`, `fmtTime`, `fmtLongDate`, `fmtAgo` (tiempo relativo con unidad adaptativa). |
 | `src/lib/api.js` | `API_BASE = import.meta.env.VITE_API_BASE \|\| "http://127.0.0.1:8000"`. `fetchEvents(from, to)`. |
 | `src/index.css` | `@import "tailwindcss"` + tokens de tema (casi-negro cálido, fuentes Bricolage Grotesque + Hanken Grotesk) + **todo el layout y los estilos de los componentes** + animación de entrada. Variable `--day-col-compact-w` para el ancho de día vacío encogido. |
@@ -248,7 +251,7 @@ helper `capFirst()` capitaliza **solo la primera letra** sobre `fmtLongDate(now)
 
 **A. Issues de §5 (viewport, last-updated, capitalización) — HECHO.** Ver §5.
 
-**B. Vista 2 — "Año linear"** (formato planner físico) — **HECHO (MVP)**, ver
+**B. Vista 3 — "Año linear"** (formato planner físico) — **HECHO (MVP)**, ver
 `YearLinear.jsx` en §4.2. Año natural (ene–dic del año en curso). Implementado:
 escalera por día de semana, bandas de finde, números, hoy resaltado y barras de
 evento por color. **Layout en 2 sub-filas por mes** (24×21) para celdas más anchas
@@ -259,20 +262,27 @@ para que el backend tenga en caché ene–may del año (antes 35 → faltaban). 
 de refinar: ver §6.E (eventos por encima de `MAX_LANES` no se pintan).
 
 **C. Cambio de vista — frontend HECHO; botón físico PENDIENTE:**
-- **State machine** de vistas en `App.jsx`: teclas `1`/`2` (3 reservada para la
-  Vista 3) + **auto-retorno** a la Vista 1 tras 60 s sin pulsar. Indicador sutil de
-  vista activa en el header (`.view-tag`). Verificado el toggle en ambos sentidos.
+- **Rotación automática** en `App.jsx`: cada 60 s (`ROTATE_MS`) avanza `1→2→3→1`,
+  mostrando cada vista un minuto. **Control manual** con teclas `1`/`2`/`3`; una
+  pulsación reinicia el minuto (la vista elegida se ve un minuto completo antes de
+  seguir rotando). Indicador de vista activa en el header (`.view-tag`).
+  **Verificado:** intercambio de teclas y avance automático 1→2 tras 65 s.
+  (Sustituye al antiguo auto-retorno a la Vista 1.)
 - **Pendiente (montaje):** en **macOS** mapear el numérico USB con
   **Karabiner-Elements** o **Hammerspoon** → que el navegador reciba esos `keydown`
   (el frontend ya los escucha).
 
-**D. Vista 3 — "Mes completo"** (post-MVP): un mes grande con todos los eventos por
-celda.
+**D. Vista 2 — "Mes completo" — HECHO (MVP)**, ver `MonthFull.jsx` en §4.2. Mes
+actual (lunes-primero), rejilla grande 7 cols × 5–6 semanas; cada celda = número de
+día + eventos como pills (hora + título) con **truncado medido + "+N más"**; hoy
+resaltado, bandas de finde, días de otro mes atenuados, color = calendario.
+**Verificado:** 35 celdas (junio), cabecera `L M X J V S D`, hoy marcado, títulos sin
+cortar, sin desbordamiento, captura headless, 0 errores de consola.
 
 **E. Refinamientos de eventos (visual):**
 - Multi-día como **barras que cruzan días** en la rejilla de 7 días y en el mini-mes
   (ahora se muestran como pill en cada día).
-- **Vista 2 — desborde de carriles:** hoy un mes pinta hasta `MAX_LANES = 3` barras;
+- **Vista 3 (año) — desborde de carriles:** hoy una sub-fila pinta hasta `MAX_LANES = 2` barras;
   los eventos que no caben **no se muestran** (sin indicador). Opciones: subir
   carriles según altura de fila, o un marcador "+N" por celda con exceso.
 
