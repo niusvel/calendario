@@ -95,8 +95,10 @@ export default function TodayTimeline({ now, events }) {
                   borderLeft: `4px solid ${ev.color}`,
                 }}
               >
-                <div className="event-time tabular">{fmtTime(s)}</div>
-                <div className="event-title">{ev.title}</div>
+                <div className="event-line">
+                  <span className="event-time tabular">{fmtTime(s)}</span>
+                  <span className="event-title">{ev.title}</span>
+                </div>
                 {ev.location && <div className="event-loc">{ev.location}</div>}
               </div>
             );

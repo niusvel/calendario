@@ -127,13 +127,20 @@ body {
 .event-block {
   position: absolute;
   border-radius: 9px;
-  padding: 0.3rem 0.55rem;
+  padding: 0.22rem 0.5rem;
+  min-height: 1.8rem;       /* asegura que cabe al menos la linea hora + titulo */
   overflow: hidden;
   backdrop-filter: blur(2px);
   display: flex; flex-direction: column; gap: 1px;
 }
-.event-time { font-size: 0.82rem; color: var(--color-dim); font-weight: 500; }
-.event-title { font-size: 1.12rem; font-weight: 600; line-height: 1.1; }
+/* hora + titulo en una sola linea (evita que el titulo se recorte en bloques cortos) */
+.event-line { display: flex; align-items: baseline; gap: 0.4rem; min-width: 0; }
+.event-time { font-size: 0.82rem; color: var(--color-dim); font-weight: 500; flex-shrink: 0; }
+.event-title {
+  font-size: 1.12rem; font-weight: 600; line-height: 1.1;
+  flex: 1 1 auto; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 .event-loc { font-size: 0.84rem; color: var(--color-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .now-line {
