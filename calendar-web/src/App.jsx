@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { fetchEvents } from "./lib/api.js";
-import { addDays, startOfDay } from "./lib/dates.js";
+import { addDays, startOfDay, coversDay } from "./lib/dates.js";
 import Header from "./components/Header.jsx";
+import Confetti from "./components/Confetti.jsx";
 import TodayTimeline from "./components/TodayTimeline.jsx";
 import WeekGrid from "./components/WeekGrid.jsx";
 import MiniMonth from "./components/MiniMonth.jsx";
@@ -10,6 +11,7 @@ import MonthFull from "./components/MonthFull.jsx";
 
 const REFRESH_MS = 60_000;        // re-consulta al backend cada minuto
 const ROTATE_MS = 60_000;         // rota a la siguiente vista cada minuto
+const BIRTHDAY_CAL = "CUMPLES";   // calendario cuyos eventos disparan el confeti
 
 export default function App() {
   const [events, setEvents] = useState([]);
@@ -83,6 +85,20 @@ export default function App() {
       .sort((a, b) => a.name.localeCompare(b.name, "es"));
   }, [events]);
 
+  // Colores de los cumpleanos de HOY (calendario CUMPLES). null si no hay ninguno;
+  // alimenta el confeti. Se recalcula solo al cambiar de dia o los eventos (no cada
+  // segundo): la dependencia es la clave del dia, no el reloj `now`.
+  const todayKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
+  const birthdayColors = useMemo(() => {
+    const [y, m, d] = todayKey.split("-").map(Number);
+    const today = new Date(y, m, d);
+    const colors = events
+      .filter((ev) => ev.calendar === BIRTHDAY_CAL && coversDay(ev, today))
+      .map((ev) => ev.color)
+      .filter(Boolean);
+    return colors.length ? colors : null;
+  }, [events, todayKey]);
+
   return (
     <div className="app">
       <Header now={now} calendars={calendars} status={status} lastUpdated={lastUpdated} view={view} />
@@ -103,6 +119,7 @@ export default function App() {
           </div>
         </main>
       )}
+      <Confetti colors={birthdayColors} />
     </div>
   );
 }

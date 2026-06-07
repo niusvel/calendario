@@ -344,3 +344,30 @@ body {
   from { opacity: 0; transform: translateY(14px); }
   to { opacity: 1; transform: none; }
 }
+
+/* ---- Confeti de cumpleanos ---- */
+
+/* Capa a pantalla completa por encima de cualquier vista; nunca bloquea la UI. */
+.confetti-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow: hidden;
+  pointer-events: none;
+}
+.confetti-piece {
+  position: absolute;
+  top: -8vh;                 /* arranca justo por encima del borde superior */
+  border-radius: 2px;
+  will-change: transform, opacity;   /* transform/opacity = animacion compositable (GPU) */
+  animation-name: confetti-fall;
+  animation-timing-function: cubic-bezier(0.3, 0.1, 0.4, 1);
+  animation-fill-mode: both;
+}
+.confetti-piece.is-round { border-radius: 50%; }
+@keyframes confetti-fall {
+  0%   { transform: translate3d(0, 0, 0) rotateZ(0deg); opacity: 0; }
+  8%   { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translate3d(var(--drift), 116vh, 0) rotateZ(var(--spin)); opacity: 0; }
+}
