@@ -26,7 +26,13 @@ cleanup() {
 trap cleanup INT TERM
 
 # --- Backend: crear venv e instalar dependencias si faltan --------------------
-if [ ! -x "$API/.venv/bin/python" ]; then
+# Un venv "zombie" (creado en otra ruta y luego movido) tiene su python como symlink
+# roto: existe pero no ejecuta. Comprobamos que ARRANQUE de verdad, no solo que este.
+if ! "$API/.venv/bin/python" -c "" >/dev/null 2>&1; then
+  if [ -e "$API/.venv" ]; then
+    echo "El venv existente esta roto (¿proyecto movido de carpeta?). Recreandolo ..."
+    rm -rf "$API/.venv"
+  fi
   echo "Creando entorno virtual de Python en calendar-api/.venv ..."
   python3 -m venv "$API/.venv" || { echo "✗ No se pudo crear el venv"; exit 1; }
   "$API/.venv/bin/pip" install -q --upgrade pip
