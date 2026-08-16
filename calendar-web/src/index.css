@@ -159,12 +159,14 @@ body {
 /* ---- Rejilla 7 dias ---- */
 
 .week-grid {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 0.6rem;
   min-height: 0;
 }
 .day-col {
+  position: relative;
   display: flex; flex-direction: column;
   background: rgba(245, 239, 226, 0.02);
   border: 1px solid var(--color-line);
@@ -174,6 +176,7 @@ body {
 }
 .day-col-weekend { background: rgba(233, 180, 76, 0.05); }
 .day-col-head {
+  position: relative; z-index: 1;
   display: flex; align-items: baseline; justify-content: space-between;
   margin-bottom: 0.5rem; padding-bottom: 0.4rem;
   border-bottom: 1px solid var(--color-line);
@@ -190,7 +193,8 @@ body {
 }
 .day-col-compact .day-dow { font-size: 0.72rem; }
 .day-col-compact .day-num { font-size: 1.3rem; }
-.day-events { flex: 1 1 0; display: flex; flex-direction: column; gap: 0.25rem; overflow: hidden; min-height: 0; }
+.day-events { position: relative; z-index: 1; flex: 1 1 0; display: flex; flex-direction: column; gap: 0.25rem; overflow: hidden; min-height: 0; }
+.day-col:not(.day-col-compact) .day-events { margin-top: calc(var(--week-lanes, 0) * 1.2rem); }
 .day-pill {
   flex-shrink: 0;            /* no encoger: si no caben, las recorta el truncado medido (no se aplastan los titulos) */
   border-radius: 6px; padding: 0.2rem 0.5rem;
@@ -204,6 +208,23 @@ body {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .day-more { font-size: 0.8rem; color: var(--color-dim); padding-left: 0.45rem; }
+
+.week-bar {
+  position: absolute;
+  height: 1.05rem;
+  border-radius: 4px;
+  display: flex; align-items: center;
+  padding: 0 0.3rem;
+  overflow: hidden;
+  z-index: 10;
+  pointer-events: none;
+  font-size: 0.8rem; font-weight: 600;
+}
+
+.week-bar-label {
+  font-size: 0.8rem; font-weight: 600; line-height: 1;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 
 /* ---- Mini-mes ---- */
 
@@ -279,7 +300,7 @@ body {
 .year-weekend { background: rgba(233, 180, 76, 0.06); }
 .year-cell-out { background: rgba(0, 0, 0, 0.22); }
 .year-num {
-  position: absolute; top: 2px; left: 4px;
+  position: absolute; z-index: 1; top: 2px; left: 4px;
   font-size: 0.82rem; line-height: 1; color: var(--color-dim);
 }
 .year-today { box-shadow: inset 0 0 0 2px var(--color-now); }
@@ -314,11 +335,13 @@ body {
 }
 
 .mf-grid {
+  position: relative;
   flex: 1 1 0; min-height: 0;
   display: grid; grid-template-columns: repeat(7, 1fr);
   gap: 0.5rem;
 }
 .mf-cell {
+  position: relative;
   display: flex; flex-direction: column;
   background: rgba(245, 239, 226, 0.02);
   border: 1px solid var(--color-line);
@@ -330,12 +353,64 @@ body {
 .mf-out { opacity: 0.45; }
 .mf-today { box-shadow: inset 0 0 0 2px var(--color-now); border-color: transparent; }
 .mf-num {
+  position: relative; z-index: 1;
   font-family: var(--font-display); font-weight: 700; font-size: 1.05rem;
   line-height: 1; margin-bottom: 0.3rem;
 }
 .mf-out .mf-num { color: var(--color-dim); }
 .mf-today .mf-num { color: var(--color-now); }
-.mf-events { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; gap: 0.2rem; overflow: hidden; }
+.mf-events { position: relative; z-index: 1; flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; gap: 0.2rem; overflow: hidden; margin-top: calc(var(--mf-lanes, 0) * 1.15rem); }
+
+/* Vacaciones: el fondo se reparte en sectores por propietario. La marca solar
+   evita confundir el sombreado con el color normal de fines de semana. */
+.vacation-shade {
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+}
+.vacation-marker {
+  position: absolute;
+  right: 0.35rem;
+  bottom: 0.3rem;
+  z-index: 2;
+  width: 1.15rem;
+  height: 1.15rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(20, 17, 12, 0.72);
+  border: 1px solid rgba(245, 239, 226, 0.32);
+  color: var(--color-now);
+  font-size: 0.72rem;
+  line-height: 1;
+  pointer-events: auto;
+}
+.year-cell .vacation-marker {
+  right: 2px;
+  bottom: 2px;
+  width: 0.85rem;
+  height: 0.85rem;
+  font-size: 0.55rem;
+}
+
+.mf-bar {
+  position: absolute;
+  border-radius: 3px;
+  padding: 0 0.25rem;
+  display: flex; align-items: center;
+  overflow: hidden;
+  height: 1rem;
+  z-index: 10;
+  pointer-events: none;
+  font-size: 0.7rem; font-weight: 600;
+}
+
+.mf-bar-label {
+  font-size: 0.7rem; font-weight: 600; line-height: 1;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 
 /* ---- Animacion de entrada ---- */
 

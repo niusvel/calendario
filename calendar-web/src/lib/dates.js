@@ -75,6 +75,25 @@ export function eventsOnDay(events, day) {
   return events.filter((ev) => coversDay(ev, day));
 }
 
+// Las vacaciones se identifican por el texto del titulo, sin depender de
+// mayusculas, tildes o de que el calendario añada mas texto al resumen.
+export function isVacationEvent(ev) {
+  return ev.title
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .includes("vacaciones");
+}
+
+export function vacationsOnDay(events, day) {
+  const seen = new Set();
+  return eventsOnDay(events, day).filter((ev) => {
+    if (!isVacationEvent(ev) || seen.has(ev.calendar)) return false;
+    seen.add(ev.calendar);
+    return true;
+  });
+}
+
 // --- Formato -------------------------------------------------------------
 
 export function fmtTime(date) {

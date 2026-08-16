@@ -1,8 +1,9 @@
 import { useMemo } from "react";
 import {
   WEEKDAYS_MINI, MONTHS_LONG, MONTHS_SHORT, daysInMonth, mondayOffset,
-  eventDayRange, startOfDay, sameDay,
+  eventDayRange, startOfDay, sameDay, isVacationEvent,
 } from "../lib/dates.js";
+import VacationShade from "./VacationShade.jsx";
 
 // 3 meses (actual + 2 siguientes). Cada mes se reparte en filas de SPLIT columnas
 // (2 semanas); el mes ocupa tantas filas como necesite. Menos datos en pantalla =
@@ -55,6 +56,7 @@ export default function QuarterView({ now, events }) {
         const items = [];
         if (domLo <= domHi) {
           for (const ev of events) {
+            if (isVacationEvent(ev)) continue;
             const [s, e] = eventDayRange(ev);
             if (e < monthStart || s > monthEnd) continue;
             const cs = Math.max(domLo, s < monthStart ? 1 : s.getDate());
@@ -118,6 +120,7 @@ export default function QuarterView({ now, events }) {
                         (isToday ? " year-today" : "")
                       }
                     >
+                      {valid && <VacationShade day={new Date(row.y, row.m, dom)} events={events} />}
                       {valid && <span className="year-num tabular">{dom}</span>}
                     </div>
                   );
