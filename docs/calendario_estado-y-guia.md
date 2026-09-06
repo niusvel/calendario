@@ -1,5 +1,10 @@
 # Calendario Familiar de Pared — Estado del proyecto y guía de continuación
 
+> **Actualización de operación (septiembre de 2026):** se ha añadido un instalador
+> macOS con supervisor de kiosco, recuperación de foco y actualizaciones por
+> versiones. Ver [macos-kiosco.md](macos-kiosco.md) para instalación y validación.
+> La comprobación en el Mac mini sigue pendiente; `dev.sh` queda para desarrollo.
+
 > **Para qué sirve este documento:** handoff autocontenido para continuar la
 > implementación desde otro entorno (VS Code + agente de código). Contiene
 > contexto, hardware, arquitectura, qué está hecho fichero a fichero, el contrato

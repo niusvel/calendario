@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Desarrollo/manual. Para arranque permanente, foco y actualización automática:
+# python3 scripts/macos/calendar_kiosk.py install (ver docs/macos-kiosco.md).
 # -----------------------------------------------------------------------------
 # Arranca el backend (FastAPI), el frontend (Vite) y, cuando ambos responden,
 # abre Google Chrome en modo kiosko apuntando al dashboard. Un solo comando:

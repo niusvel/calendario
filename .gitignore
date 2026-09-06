@@ -16,3 +16,7 @@ Thumbs.db
 # Export privado de datos de la familia (NO subir, esté en la carpeta que esté)
 calendar-export.md
 family-calendar-export.md
+
+# Herramientas Python de operación local
+__pycache__/
+*.py[cod]
