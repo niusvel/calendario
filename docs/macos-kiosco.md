@@ -1,5 +1,10 @@
 # Mac mini: actualizaciones automáticas y recuperación del kiosco
 
+Estado de la sesión y continuación desde otro equipo:
+[continuar-desde-casa.md](continuar-desde-casa.md). La instalación y recuperación
+del foco ya están confirmadas en el Mac; la recepción automática de doble Q y
+su cierre real aún deben comprobarse.
+
 El arranque permanente pasa de `dev.sh` a dos agentes de usuario de macOS:
 
 - **Supervisor**: inicia API, frontend compilado y Chrome; revisa los procesos y

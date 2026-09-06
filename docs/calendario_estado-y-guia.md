@@ -1,5 +1,9 @@
 # Calendario Familiar de Pared — Estado del proyecto y guía de continuación
 
+> **Para retomar desde otro equipo:** leer primero
+> [continuar-desde-casa.md](continuar-desde-casa.md), con el estado confirmado,
+> las rutas del Mac y los pasos pendientes de la sesión del 6 de septiembre.
+
 > **Actualización de operación (septiembre de 2026):** se ha añadido un instalador
 > macOS con supervisor de kiosco, recuperación de foco y actualizaciones por
 > versiones. Ver [macos-kiosco.md](macos-kiosco.md) para instalación y validación.
