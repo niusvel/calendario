@@ -253,6 +253,7 @@ class Supervisor:
         self.browser_started = 0.0
         self.failures = 0
         self.browser_failures = 0
+        self.focus_failures = 0
         self.reloaded = False
         # El supervisor rota la salida de servicios al arrancar (el log principal rota en vivo).
         service_log = state / "logs/services.log"
@@ -325,12 +326,27 @@ class Supervisor:
                 self.start_browser()
                 return
         # AppKit activa el proceso exacto sin controlar el Chrome personal por nombre.
+        # Chrome tarda en registrarse como aplicación gráfica tras cada arranque: el guion
+        # distingue ese caso del rechazo de macOS en lugar de interrumpir la supervisión.
         script = (
             'ObjC.import("AppKit"); '
+            '(function () { '
             f'var app = $.NSRunningApplication.runningApplicationWithProcessIdentifier({self.chrome.pid}); '
-            'if (!app.isActive && !app.activateWithOptions(3)) { throw Error("No se pudo recuperar el foco"); }'
+            'if (!app || typeof app.activateWithOptions !== "function") { return "ausente"; } '
+            'if (app.isActive) { return "activa"; } '
+            'return app.activateWithOptions(3) ? "recuperada" : "rechazada"; '
+            '})()'
         )
-        command(["/usr/bin/osascript", "-l", "JavaScript", "-e", script], timeout=5)
+        outcome = command(["/usr/bin/osascript", "-l", "JavaScript", "-e", script], timeout=5)
+        if outcome == "ausente":
+            return
+        if outcome == "rechazada":
+            # Un aviso al primer rechazo y luego cada cinco minutos, sin inundar el log.
+            if self.focus_failures % 30 == 0:
+                LOG.warning("macOS rechazó devolver el foco al calendario")
+            self.focus_failures += 1
+            return
+        self.focus_failures = 0
 
     def tick(self) -> None:
         """Evalúa una actualización, la salud de los servicios y el estado del kiosco."""

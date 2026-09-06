@@ -175,6 +175,43 @@ class KioskTests(unittest.TestCase):
             kiosk.Supervisor.recover_browser(supervisor)
         self.assertIn("runningApplicationWithProcessIdentifier(1234)", command.call_args.args[0][-1])
 
+    def test_chrome_not_yet_registered_is_not_a_supervision_error(self):
+        # Justo tras arrancar Chrome, AppKit todavía no conoce el PID: reintentar en silencio.
+        supervisor = self.supervisor()
+        supervisor.chrome = Mock(pid=1234)
+        supervisor.chrome.poll.return_value = None
+        with patch.object(kiosk, "fetch_json", return_value=[{
+            "type": "page", "url": kiosk.WEB_URL, "id": "calendar",
+        }]), patch.object(kiosk, "urlopen"), patch.object(kiosk, "command", return_value="ausente"), \
+                patch.object(kiosk.LOG, "warning") as warning:
+            kiosk.Supervisor.recover_browser(supervisor)
+        warning.assert_not_called()
+        self.assertEqual(supervisor.focus_failures, 0)
+
+    def test_rejected_focus_warns_once_before_repeating(self):
+        supervisor = self.supervisor()
+        supervisor.chrome = Mock(pid=1234)
+        supervisor.chrome.poll.return_value = None
+        with patch.object(kiosk, "fetch_json", return_value=[{
+            "type": "page", "url": kiosk.WEB_URL, "id": "calendar",
+        }]), patch.object(kiosk, "urlopen"), patch.object(kiosk, "command", return_value="rechazada"), \
+                patch.object(kiosk.LOG, "warning") as warning:
+            for _ in range(30):
+                kiosk.Supervisor.recover_browser(supervisor)
+        self.assertEqual(warning.call_count, 1)
+        self.assertEqual(supervisor.focus_failures, 30)
+
+    def test_recovered_focus_clears_previous_rejections(self):
+        supervisor = self.supervisor()
+        supervisor.chrome = Mock(pid=1234)
+        supervisor.chrome.poll.return_value = None
+        supervisor.focus_failures = 7
+        with patch.object(kiosk, "fetch_json", return_value=[{
+            "type": "page", "url": kiosk.WEB_URL, "id": "calendar",
+        }]), patch.object(kiosk, "urlopen"), patch.object(kiosk, "command", return_value="recuperada"):
+            kiosk.Supervisor.recover_browser(supervisor)
+        self.assertEqual(supervisor.focus_failures, 0)
+
     def test_missing_browser_window_is_recreated_after_three_failures(self):
         supervisor = self.supervisor()
         supervisor.chrome = Mock()
