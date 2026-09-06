@@ -2,6 +2,7 @@ import {
   evStart, evEnd, fmtTime, layoutLanes, startOfDay, sameDay,
 } from "../lib/dates.js";
 import { chip } from "../lib/colors.js";
+import EventTitle from "./EventTitle.jsx";
 
 export default function TodayTimeline({ now, events }) {
   const today = startOfDay(now);
@@ -48,7 +49,7 @@ export default function TodayTimeline({ now, events }) {
               className="allday-chip"
               style={chip(ev.color)}
             >
-              {ev.title}
+              <EventTitle title={ev.title} />
             </div>
           ))}
         </div>
@@ -91,7 +92,7 @@ export default function TodayTimeline({ now, events }) {
               >
                 <div className="event-line">
                   <span className="event-time tabular">{fmtTime(s)}</span>
-                  <span className="event-title">{ev.title}</span>
+                  <span className="event-title"><EventTitle title={ev.title} /></span>
                 </div>
                 {ev.location && <div className="event-loc">{ev.location}</div>}
               </div>

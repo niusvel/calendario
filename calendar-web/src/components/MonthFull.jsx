@@ -4,6 +4,7 @@ import { packLanes } from "../lib/lanes.js";
 import { useBarPositions } from "../lib/bars.js";
 import { chip } from "../lib/colors.js";
 import DayCell from "./DayCell.jsx";
+import EventTitle from "./EventTitle.jsx";
 
 const MAX_LANES = 2;
 const DAY_MS = 86_400_000;
@@ -74,7 +75,7 @@ export default function MonthFull({ now, events }) {
         ))}
         {barsByWeek.flatMap((bars) => bars.filter((bar) => bar.lane < MAX_LANES).map((bar) => (
           <div key={bar.id} className="mf-bar" title={bar.event.title} style={{ ...barPositions[bar.id], ...chip(bar.event.color) }}>
-            <span className="mf-bar-label">{bar.event.title}</span>
+            <span className="mf-bar-label"><EventTitle title={bar.event.title} /></span>
           </div>
         )))}
       </div>

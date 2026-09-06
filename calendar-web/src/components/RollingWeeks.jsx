@@ -5,6 +5,7 @@ import {
 import { packLanes } from "../lib/lanes.js";
 import { chip } from "../lib/colors.js";
 import DayCell from "./DayCell.jsx";
+import EventTitle from "./EventTitle.jsx";
 
 // Semanas consecutivas en lugar de tres meses de calendario. Antes cada mes se
 // partia en filas de catorce columnas, asi que un dia medida la mitad y los
@@ -116,7 +117,7 @@ export default function RollingWeeks({ now, events }) {
                       ...chip(bar.event.color),
                     }}
                   >
-                    <span className="mf-bar-label">{bar.event.title}</span>
+                    <span className="mf-bar-label"><EventTitle title={bar.event.title} /></span>
                   </div>
                 ))}
               </div>

@@ -412,7 +412,9 @@ body {
   pointer-events: none;
   z-index: 0;
 }
-.roll .day-shade { inset: 0; }
+/* En la rejilla continua no hay hueco entre celdas: el margen interior separa
+   los dias sombreados para que no se fundan en un bloque. */
+.roll .day-shade { inset: 3px 4px 3px 3px; border-radius: 6px; }
 
 .mf-bar {
   position: absolute;
@@ -430,6 +432,12 @@ body {
   font-size: 1.15rem; font-weight: 700; line-height: 1;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+
+/* ---- Pegatinas ---- */
+
+/* Mas grande que el texto: es lo que se reconoce de lejos. */
+.sticker { font-size: 1.25em; line-height: 1; margin-right: 0.3em; vertical-align: -0.1em; }
+.mf-bar .sticker, .week-bar .sticker { font-size: 1.1em; margin-right: 0.25em; }
 
 /* ---- Animacion de entrada ---- */
 

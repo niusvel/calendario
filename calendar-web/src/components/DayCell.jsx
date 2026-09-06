@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { eventsOnDay, evStart, fmtTime, sameDay, isVacationEvent } from "../lib/dates.js";
+import { eventsOnDay, evStart, fmtTime, sameDay, isVacationEvent, isHolidayEvent } from "../lib/dates.js";
+import EventTitle from "./EventTitle.jsx";
 import DayShade from "./DayShade.jsx";
 import { chip } from "../lib/colors.js";
 
@@ -10,7 +11,8 @@ export default function DayCell({
   day, now, events, multiDayIds, hidden = 0, laneCount = 0, muted = false, label, cellRef,
 }) {
   const sorted = eventsOnDay(events, day)
-    .filter((event) => !multiDayIds.has(event.id) && !isVacationEvent(event))
+    // Vacaciones y festivos ya tinen el dia: no necesitan etiqueta.
+    .filter((event) => !multiDayIds.has(event.id) && !isVacationEvent(event) && !isHolidayEvent(event))
     .sort((a, b) => {
       if (a.all_day && !b.all_day) return -1;
       if (!a.all_day && b.all_day) return 1;
@@ -55,7 +57,7 @@ export default function DayCell({
         {shown.map((ev) => (
           <div key={ev.id} className="day-pill" style={chip(ev.color)}>
             {!ev.all_day && <span className="day-pill-time tabular">{fmtTime(evStart(ev))}</span>}
-            <span className="day-pill-title">{ev.title}</span>
+            <span className="day-pill-title"><EventTitle title={ev.title} /></span>
           </div>
         ))}
         {extra > 0 && <div className="day-more">+{extra} más</div>}

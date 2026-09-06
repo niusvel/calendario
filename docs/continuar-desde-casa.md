@@ -135,6 +135,15 @@ hora simbólica `00:00:01` como día completo. Entrada en `config.yaml`:
 normalmente en primavera). Fuente: Open Data Euskadi, dataset "Calendario laboral
 de Euskadi para el 2026".
 
+## Pegatinas
+
+Cada etiqueta lleva delante un icono deducido del título (🎂 cumple, 💇 peluquería,
+🦷 dentista, 🩺 médico, 🔧 taller, ✈️ viaje, 🎉 fiesta…). La lista vive en
+`calendar-web/src/lib/stickers.js`: para añadir o cambiar una basta con editar ahí
+(palabra clave → emoji; la primera regla que coincide gana) y el kiosco la recibe
+con la actualización normal. Si el título en iCloud ya trae un emoji, se respeta y
+no se añade otro. Los festivos no llevan etiqueta ni pegatina: solo el fondo rojo.
+
 ## Barra de menús y cursor
 
 Si el puntero se queda apoyado en el borde superior, macOS despliega la barra de
@@ -160,8 +169,6 @@ Cuestiones visuales y de fechas detectadas en la revisión inicial, **todavía s
 - Indicador de actualización que no refleja bien los fallos de iCloud.
 - Rediseño de la Vista 1: el panel "Hoy" ocupa media pantalla casi siempre vacío.
   La usuaria quiere añadir ahí el tiempo (temperatura y lluvia) cuando se aborde.
-- Iconos/pegatinas por tipo de evento (peluquería, dentista, cumpleaños…), pedidos
-  por la usuaria: se reconocen de lejos donde el texto ya no se lee.
 
 Resueltos en esta sesión: comparación de `Date` por referencia (afectaba a semana y
 mes), eventos ocultos al exceder los carriles y el fin a medianoche.
