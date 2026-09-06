@@ -4,6 +4,7 @@ import {
   eventDayRange, startOfDay, sameDay, isVacationEvent,
 } from "../lib/dates.js";
 import VacationShade from "./VacationShade.jsx";
+import { chip } from "../lib/colors.js";
 
 // 3 meses (actual + 2 siguientes). Cada mes se reparte en filas de SPLIT columnas
 // (2 semanas); el mes ocupa tantas filas como necesite. Menos datos en pantalla =
@@ -11,10 +12,6 @@ import VacationShade from "./VacationShade.jsx";
 // de semana, asi las bandas de finde quedan verticales.
 const SPLIT = 14;
 const MAX_LANES = 3; // carriles de evento por fila
-
-function tint(hex, alpha = "40") {
-  return /^#[0-9a-fA-F]{6}$/.test(hex) ? hex + alpha : hex;
-}
 
 const isWeekendCol = (c) => c % 7 === 5 || c % 7 === 6; // col 0 = lunes
 
@@ -135,8 +132,7 @@ export default function QuarterView({ now, events }) {
                     left: `${it.startCol * colPct}%`,
                     width: `${(it.endCol - it.startCol + 1) * colPct}%`,
                     top: `calc(var(--year-num-h) + ${it.lane} * var(--year-lane-h))`,
-                    background: tint(it.color, "40"),
-                    borderLeft: `3px solid ${it.color}`,
+                    ...chip(it.color),
                   }}
                 >
                   <span className="year-bar-label">{it.title}</span>

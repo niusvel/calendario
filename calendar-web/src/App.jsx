@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { fetchEvents } from "./lib/api.js";
 import { addDays, startOfDay, coversDay } from "./lib/dates.js";
+import { themeFor } from "./lib/theme.js";
 import Header from "./components/Header.jsx";
 import Confetti from "./components/Confetti.jsx";
 import KioskShortcut from "./components/KioskShortcut.jsx";
@@ -77,6 +78,13 @@ export default function App() {
       clearTimeout(rotateTimer.current);
     };
   }, []);
+
+  // Claro de dia y oscuro de noche: solo cambia dos veces al dia, asi que el
+  // efecto no se dispara con el reloj de cada segundo.
+  const theme = themeFor(now);
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
 
   const calendars = useMemo(() => {
     const seen = new Map();

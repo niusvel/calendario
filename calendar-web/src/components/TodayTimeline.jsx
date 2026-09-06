@@ -1,12 +1,7 @@
 import {
   evStart, evEnd, fmtTime, layoutLanes, startOfDay, sameDay,
 } from "../lib/dates.js";
-
-// Mezcla un color hex con transparencia (relleno tenue sobre fondo oscuro).
-function tint(hex, alpha = "26") {
-  if (/^#[0-9a-fA-F]{6}$/.test(hex)) return hex + alpha;
-  return hex;
-}
+import { chip } from "../lib/colors.js";
 
 export default function TodayTimeline({ now, events }) {
   const today = startOfDay(now);
@@ -51,7 +46,7 @@ export default function TodayTimeline({ now, events }) {
             <div
               key={ev.id}
               className="allday-chip"
-              style={{ background: tint(ev.color, "33"), borderLeft: `4px solid ${ev.color}` }}
+              style={chip(ev.color)}
             >
               {ev.title}
             </div>
@@ -91,8 +86,7 @@ export default function TodayTimeline({ now, events }) {
                   height: `${height}%`,
                   left: `calc(${lane * width}% + 2px)`,
                   width: `calc(${width}% - 4px)`,
-                  background: tint(ev.color, "2e"),
-                  borderLeft: `4px solid ${ev.color}`,
+                  ...chip(ev.color),
                 }}
               >
                 <div className="event-line">

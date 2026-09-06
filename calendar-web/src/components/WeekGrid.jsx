@@ -1,10 +1,13 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { addDays, startOfDay, eventsOnDay, evStart, fmtTime, WEEKDAYS_SHORT, eventDayRange, isVacationEvent } from "../lib/dates.js";
+import { addDays, startOfDay, eventsOnDay, evStart, fmtTime, WEEKDAYS_SHORT, eventDayRange, isVacationEvent, sameDay } from "../lib/dates.js";
 import VacationShade from "./VacationShade.jsx";
+import { chip } from "../lib/colors.js";
+import { rootRem } from "../lib/layout.js";
 
-const MAX_LANES = 3;
+const MAX_LANES = 2;
 const DAY_MS = 86_400_000;
-function tint(hex, alpha = "26") { return /^#[0-9a-fA-F]{6}$/.test(hex) ? hex + alpha : hex; }
+const HEAD_REM = 3.4;   // alto de la cabecera del dia (dia de semana + numero)
+const LANE_REM = 1.7;   // paso vertical entre carriles de barra
 function packLanes(items) {
   const laneEnds = [];
   return [...items].sort((a, b) => a.startCol - b.startCol || a.endCol - b.endCol).map((item) => {
@@ -36,7 +39,7 @@ function DayColumn({ day, events, isWeekend, compact, laneCount, multiDayIds, co
   return <div ref={columnRef} className={"day-col" + (isWeekend ? " day-col-weekend" : "") + (compact ? " day-col-compact" : "")} style={{ "--week-lanes": laneCount }}>
     <VacationShade day={day} events={events} />
     <div className="day-col-head"><span className="day-dow">{WEEKDAYS_SHORT[day.getDay()]}</span><span className="day-num tabular">{day.getDate()}</span></div>
-    {!compact && <div className="day-events" ref={listRef}>{shown.map((ev) => <div key={ev.id} className="day-pill" style={{ background: tint(ev.color, "24"), borderLeft: `3px solid ${ev.color}` }}>{!ev.all_day && <span className="day-pill-time tabular">{fmtTime(evStart(ev))}</span>}<span className="day-pill-title">{ev.title}</span></div>)}{extra > 0 && <div className="day-more">+{extra} más</div>}</div>}
+    {!compact && <div className="day-events" ref={listRef}>{shown.map((ev) => <div key={ev.id} className="day-pill" style={chip(ev.color)}>{!ev.all_day && <span className="day-pill-time tabular">{fmtTime(evStart(ev))}</span>}<span className="day-pill-title">{ev.title}</span></div>)}{extra > 0 && <div className="day-more">+{extra} más</div>}</div>}
   </div>;
 }
 
@@ -50,7 +53,9 @@ export default function WeekGrid({ now, events }) {
   const bars = packLanes(events.flatMap((event) => {
     if (isVacationEvent(event)) return [];
     const [eventStart, eventEnd] = eventDayRange(event);
-    if (eventStart === eventEnd || eventEnd < start || eventStart > end) return [];
+    // eventDayRange devuelve dos Date distintos: compararlos con === solo mide la
+    // referencia, nunca la fecha, y todo evento de un dia acababa pintado como barra.
+    if (sameDay(eventStart, eventEnd) || eventEnd < start || eventStart > end) return [];
     const clippedStart = eventStart < start ? start : eventStart;
     const clippedEnd = eventEnd > end ? end : eventEnd;
     return [{ id: `${event.id}-${start.toISOString()}`, event, startCol: Math.round((clippedStart - start) / DAY_MS), endCol: Math.round((clippedEnd - start) / DAY_MS) }];
@@ -67,6 +72,7 @@ export default function WeekGrid({ now, events }) {
       const grid = gridRef.current;
       if (!grid) return;
       const gridBox = grid.getBoundingClientRect();
+      const rem = rootRem();
       const next = {};
       bars.forEach((bar) => {
         const first = columnRefs.current[bar.startCol];
@@ -77,7 +83,7 @@ export default function WeekGrid({ now, events }) {
         next[bar.id] = {
           left: a.left - gridBox.left,
           width: b.right - a.left,
-          top: 48 + bar.lane * 19,
+          top: rem * HEAD_REM + bar.lane * rem * LANE_REM,
         };
       });
       setBarPositions(next);
@@ -91,7 +97,7 @@ export default function WeekGrid({ now, events }) {
     <div className="panel-title">Próximos 7 días</div>
     <div ref={gridRef} className="week-grid flex-1" style={{ gridTemplateColumns: template }}>
       {cols.map((column, index) => <DayColumn key={column.day.toISOString()} columnRef={(node) => { columnRefs.current[index] = node; }} {...column} compact={compact[index]} laneCount={laneCount} multiDayIds={multiDayIds} />)}
-      {bars.filter((bar) => bar.lane < MAX_LANES).map((bar) => <div key={bar.id} className="week-bar" title={bar.event.title} style={{ ...barPositions[bar.id], background: tint(bar.event.color, "40"), borderLeft: `3px solid ${bar.event.color}` }}><span className="week-bar-label">{bar.event.title}</span></div>)}
+      {bars.filter((bar) => bar.lane < MAX_LANES).map((bar) => <div key={bar.id} className="week-bar" title={bar.event.title} style={{ ...barPositions[bar.id], ...chip(bar.event.color) }}><span className="week-bar-label">{bar.event.title}</span></div>)}
     </div>
   </section>;
 }
