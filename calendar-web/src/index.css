@@ -1,5 +1,21 @@
 @import "tailwindcss";
 
+.kiosk-notice {
+  position: fixed;
+  z-index: 10000;
+  left: 50%;
+  bottom: 2rem;
+  transform: translateX(-50%);
+  max-width: calc(100vw - 4rem);
+  padding: 1rem 1.5rem;
+  border: 1px solid #777;
+  border-radius: 0.75rem;
+  background: #181818;
+  color: #fff;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
 /* ----------------------------------------------------------------------------
    Family Wall Calendar — Vista 1
    Estetica: "panel de salidas editorial" calido. Casi-negro templado, tipografia

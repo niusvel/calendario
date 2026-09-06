@@ -3,7 +3,9 @@
 > **Actualización de operación (septiembre de 2026):** se ha añadido un instalador
 > macOS con supervisor de kiosco, recuperación de foco y actualizaciones por
 > versiones. Ver [macos-kiosco.md](macos-kiosco.md) para instalación y validación.
-> La comprobación en el Mac mini sigue pendiente; `dev.sh` queda para desarrollo.
+> Instalación y recuperación del foco confirmadas en el Mac mini el 6 de septiembre.
+> Se añade doble Q para pausar 30 minutos; su comprobación en el Mac sigue pendiente.
+> `dev.sh` queda para desarrollo.
 
 > **Para qué sirve este documento:** handoff autocontenido para continuar la
 > implementación desde otro entorno (VS Code + agente de código). Contiene

@@ -23,6 +23,7 @@ Mac mini.
 | --- | --- |
 | `GET /events?from=YYYY-MM-DD&to=YYYY-MM-DD` | Eventos que solapan ese rango (JSON). Sin parametros: de hoy-7d a hoy+400d. |
 | `GET /health` | Estado de cada calendario (ok/error, ultimo exito, nº de eventos). |
+| `POST /kiosk/pause` | Pausa de 30 minutos mediante doble Q; solo desde la pantalla local de una instalación administrada. |
 | `GET /` | Info basica. |
 
 Forma de cada evento:

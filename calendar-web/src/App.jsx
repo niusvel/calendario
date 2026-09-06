@@ -3,6 +3,7 @@ import { fetchEvents } from "./lib/api.js";
 import { addDays, startOfDay, coversDay } from "./lib/dates.js";
 import Header from "./components/Header.jsx";
 import Confetti from "./components/Confetti.jsx";
+import KioskShortcut from "./components/KioskShortcut.jsx";
 import TodayTimeline from "./components/TodayTimeline.jsx";
 import WeekGrid from "./components/WeekGrid.jsx";
 import MiniMonth from "./components/MiniMonth.jsx";
@@ -120,6 +121,7 @@ export default function App() {
         </main>
       )}
       <Confetti colors={birthdayColors} />
+      <KioskShortcut />
     </div>
   );
 }

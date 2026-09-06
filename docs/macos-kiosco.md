@@ -118,6 +118,14 @@ también permite retomar una instalación interrumpida.
 
 ## Mantenimiento sin que Chrome reclame el foco
 
+Con el calendario enfocado, pulsa **Q dos veces en menos de un segundo**. Aparecerá
+un aviso y el supervisor cerrará su ventana en unos 10 segundos, con una pausa de
+30 minutos. Mantener Q pulsada no activa el atajo. Funciona en las tres vistas.
+Al acabar la pausa vuelve a abrirse automáticamente.
+
+Este atajo utiliza el archivo de pausa que ya reconoce el supervisor: llega por
+actualización normal del frontend/backend, sin reinstalar los agentes.
+
 Desde una terminal del Mac, o mediante SSH con el mismo usuario:
 
 ```bash
@@ -157,6 +165,10 @@ Pruebas de lógica, fallos y servidor estático (también ejecutables en Windows
 
 ```bash
 python -m unittest discover -s scripts/macos -p test_calendar_kiosk.py -v
+# Con las dependencias del backend instaladas:
+python -m unittest discover -s calendar-api -p test_kiosk_control.py -v
+# Dentro de calendar-web:
+npm test
 ```
 
 Comprobaciones que deben hacerse en el Mac mini antes de dar la instalación por
@@ -165,7 +177,7 @@ validada:
 1. Iniciar sesión y verificar que aparece el calendario.
 2. Abrir otra aplicación y comprobar la recuperación del foco en unos 10 segundos.
 3. Cerrar la ventana del kiosco y comprobar que vuelve a abrirse.
-4. Pausar, utilizar el escritorio y reanudar.
+4. Pulsar Q dos veces, utilizar el escritorio y reanudar (o esperar 30 minutos).
 5. Publicar un cambio visible y comprobar la nueva revisión en `status` y en pantalla.
 6. Reiniciar un proceso administrado y comprobar su recuperación.
 

@@ -23,10 +23,11 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 import yaml
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from calendar_source import CalendarConfig, LOCAL_TZ, fetch_ics, parse_and_expand
+from kiosk_control import pause_kiosk
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("family-calendar")
@@ -128,13 +129,19 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Family Wall Calendar", lifespan=lifespan)
 
-# localhost / LAN, sin auth: CORS abierto a proposito (Vite dev + kiosk).
+# Lectura localhost/LAN. El POST de control valida además origen, Host y cliente.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_methods=["GET"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
+
+
+@app.post("/kiosk/pause")
+def request_kiosk_pause(request: Request):
+    """La doble Q del calendario solicita al supervisor una pausa de mantenimiento."""
+    return pause_kiosk(request, CONFIG_PATH)
 
 
 def _all_events() -> list[dict]:
