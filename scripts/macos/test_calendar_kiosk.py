@@ -212,6 +212,20 @@ class KioskTests(unittest.TestCase):
             kiosk.Supervisor.recover_browser(supervisor)
         self.assertEqual(supervisor.focus_failures, 0)
 
+    def test_cursor_resting_on_top_edge_is_parked_away(self):
+        supervisor = self.supervisor()
+        with patch.object(kiosk, "command", return_value="apartado") as command, \
+                patch.object(kiosk.LOG, "info") as info:
+            kiosk.Supervisor.park_cursor(supervisor)
+        self.assertIn("CGWarpMouseCursorPosition", command.call_args.args[0][-1])
+        info.assert_called_once()
+
+    def test_cursor_elsewhere_is_left_alone(self):
+        supervisor = self.supervisor()
+        with patch.object(kiosk, "command", return_value="lejos"), patch.object(kiosk.LOG, "info") as info:
+            kiosk.Supervisor.park_cursor(supervisor)
+        info.assert_not_called()
+
     def test_missing_browser_window_is_recreated_after_three_failures(self):
         supervisor = self.supervisor()
         supervisor.chrome = Mock()

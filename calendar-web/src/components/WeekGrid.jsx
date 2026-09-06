@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { addDays, startOfDay, eventsOnDay, evStart, fmtTime, WEEKDAYS_SHORT, eventDayRange, isVacationEvent, sameDay } from "../lib/dates.js";
-import VacationShade from "./VacationShade.jsx";
+import DayShade from "./DayShade.jsx";
 import { chip } from "../lib/colors.js";
 import { packLanes } from "../lib/lanes.js";
 import { useBarPositions } from "../lib/bars.js";
@@ -29,7 +29,7 @@ function DayColumn({ day, events, isWeekend, compact, laneCount, multiDayIds, co
   const shown = sorted.slice(0, count);
   const extra = sorted.length - shown.length;
   return <div ref={columnRef} className={"day-col" + (isWeekend ? " day-col-weekend" : "") + (compact ? " day-col-compact" : "")} style={{ "--week-lanes": laneCount }}>
-    <VacationShade day={day} events={events} />
+    <DayShade day={day} events={events} />
     <div className="day-col-head"><span className="day-dow">{WEEKDAYS_SHORT[day.getDay()]}</span><span className="day-num tabular">{day.getDate()}</span></div>
     {!compact && <div className="day-events" ref={listRef}>{shown.map((ev) => <div key={ev.id} className="day-pill" style={chip(ev.color)}>{!ev.all_day && <span className="day-pill-time tabular">{fmtTime(evStart(ev))}</span>}<span className="day-pill-title">{ev.title}</span></div>)}{extra > 0 && <div className="day-more">+{extra} más</div>}</div>}
   </div>;

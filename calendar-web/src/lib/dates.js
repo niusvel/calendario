@@ -85,10 +85,20 @@ export function isVacationEvent(ev) {
     .includes("vacaciones");
 }
 
-export function vacationsOnDay(events, day) {
+// Los festivos llegan de un calendario propio (el laboral de Euskadi filtrado
+// por localidad), no del titulo: asi "San Juan" cuenta como festivo sin adivinar.
+export const HOLIDAY_CAL = "FESTIVOS";
+
+export function isHolidayEvent(ev) {
+  return ev.calendar === HOLIDAY_CAL;
+}
+
+// Eventos que tinen el fondo del dia entero, uno por calendario: vacaciones de
+// cada persona y festivos. Un dia asi se lee distinto de lejos.
+export function dayShadesOn(events, day) {
   const seen = new Set();
   return eventsOnDay(events, day).filter((ev) => {
-    if (!isVacationEvent(ev) || seen.has(ev.calendar)) return false;
+    if (!(isVacationEvent(ev) || isHolidayEvent(ev)) || seen.has(ev.calendar)) return false;
     seen.add(ev.calendar);
     return true;
   });

@@ -91,7 +91,7 @@ body {
     var(--color-bg);
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
-  cursor: default;
+  cursor: none;   /* pantalla de pared: la flecha solo estorba */
 }
 
 .font-display { font-family: var(--font-display); }
@@ -403,17 +403,16 @@ body {
 .mf-today .mf-num { color: var(--color-now); }
 .mf-events { position: relative; z-index: 1; flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; gap: 0.25rem; overflow: hidden; margin-top: calc(var(--mf-lanes, 0) * 1.65rem); }
 
-/* Vacaciones: cinta de color en el borde inferior del dia, repartida entre los
-   propietarios. Se lee de lejos y deja el contenido del dia intacto. */
-.vacation-band {
+/* Vacaciones y festivos: el dia entero cambia de fondo, repartido en sectores
+   si coinciden varias personas. Queda bajo el numero y las etiquetas. */
+.day-shade {
   position: absolute;
-  left: 1px; right: 1px; bottom: 1px;
-  height: 0.45rem;
-  border-bottom-left-radius: inherit;
-  border-bottom-right-radius: inherit;
+  inset: 1px;
+  border-radius: inherit;
   pointer-events: none;
-  z-index: 2;
+  z-index: 0;
 }
+.roll .day-shade { inset: 0; }
 
 .mf-bar {
   position: absolute;

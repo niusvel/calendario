@@ -16,6 +16,7 @@ Todas las comprobaciones que quedaban pendientes se han hecho sobre el Mac mini 
 | Retorno tras `resume` y al caducar la pausa | Vuelve en 5–12 segundos, comprobado varias veces. |
 | Arranque tras reiniciar | Confirmado por un corte de luz en casa. |
 | Recuperación de servicios | Supervisor, API y frontend levantan solos; los 7 calendarios de iCloud descargan bien. |
+| Barra de menús de macOS sobre el kiosco | Causa confirmada (cursor en y=0); el supervisor aparta el puntero. |
 
 Con esto, **el trabajo pendiente ya no es de operación sino de interfaz**: quedan los
 arreglos visuales y de fechas listados más abajo.
@@ -86,6 +87,54 @@ launchctl bootstrap "gui/$U" "$HOME/Library/LaunchAgents/local.family-calendar.r
 launchctl bootstrap "gui/$U" "$HOME/Library/LaunchAgents/local.family-calendar.update.plist"
 ```
 
+## Colores, vacaciones y festivos
+
+Los colores de cada calendario viven en el `config.yaml` privado del Mac, no en
+iCloud. Paleta sobria vigente (la usuaria pidió tonos apagados, tomando el suyo
+como referencia):
+
+| Calendario | Color | Tono |
+| --- | --- | --- |
+| LEYA | `#1E4C63` | teal marino (sin cambios) |
+| NIUSVEL | `#B8623F` | terracota |
+| NAIARA | `#B9788A` | rosa empolvado |
+| NIUSVELITO | `#6E8F58` | salvia |
+| BELINDA | `#6F5E9C` | ciruela |
+| FAMILY | `#5D7A94` | azul acero |
+| CUMPLES | `#D9B44A` | mostaza |
+| FESTIVOS | `#A8433B` | rojo festivo |
+
+La API lee la configuración solo al arrancar: tras cambiar colores hay que
+reiniciarla (`pkill -f "uvicorn main:app"` en el Mac; el supervisor la levanta en
+menos de un minuto, sin tocar Chrome).
+
+Las vacaciones (evento con "vacaciones" en el título) y los festivos tiñen el
+fondo del día entero, repartido en sectores si coinciden varias personas. Los
+festivos se reconocen por el **nombre de calendario `FESTIVOS`** en el frontend.
+
+Los festivos vienen del calendario laboral oficial de Open Data Euskadi, que en un
+solo `.ics` mezcla comunidad, territorios y todos los municipios. El backend lo
+filtra con `include_locations` (coincidencia parcial, sin mayúsculas) y trata su
+hora simbólica `00:00:01` como día completo. Entrada en `config.yaml`:
+
+```yaml
+  - name: "FESTIVOS"
+    color: "#A8433B"
+    url: "https://opendata.euskadi.eus/contenidos/ds_eventos/calendario_laboral_2026/opendata/calendario_laboral_2026.ics"
+    include_locations: ["CAE / EAE", "Gipuzkoa", "Donostia"]
+```
+
+**La URL cambia cada año** (`calendario_laboral_2027.ics` cuando lo publiquen,
+normalmente en primavera). Fuente: Open Data Euskadi, dataset "Calendario laboral
+de Euskadi para el 2026".
+
+## Barra de menús y cursor
+
+Si el puntero se queda apoyado en el borde superior, macOS despliega la barra de
+menús sobre el kiosco (lo deja ahí Chrome Remote Desktop o un roce del ratón). El
+supervisor lo aparta a la esquina inferior derecha en cada ciclo cuando lo detecta
+a menos de 2 px del borde, y la página oculta la flecha con `cursor: none`.
+
 ## Implementación de doble Q
 
 - `calendar-web/src/components/KioskShortcut.jsx`: escucha el atajo, pide la pausa
@@ -101,10 +150,14 @@ launchctl bootstrap "gui/$U" "$HOME/Library/LaunchAgents/local.family-calendar.u
 
 Cuestiones visuales y de fechas detectadas en la revisión inicial, **todavía sin corregir**:
 
-- Comparación de objetos `Date` por referencia en la vista semanal.
-- Eventos ocultos al exceder tres carriles.
-- Fin a medianoche incluido en el día siguiente.
 - Indicador de actualización que no refleja bien los fallos de iCloud.
+- Rediseño de la Vista 1: el panel "Hoy" ocupa media pantalla casi siempre vacío.
+  La usuaria quiere añadir ahí el tiempo (temperatura y lluvia) cuando se aborde.
+- Iconos/pegatinas por tipo de evento (peluquería, dentista, cumpleaños…), pedidos
+  por la usuaria: se reconocen de lejos donde el texto ya no se lee.
+
+Resueltos en esta sesión: comparación de `Date` por referencia (afectaba a semana y
+mes), eventos ocultos al exceder los carriles y el fin a medianoche.
 
 ## Límites conocidos
 

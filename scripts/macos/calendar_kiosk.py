@@ -348,6 +348,22 @@ class Supervisor:
             return
         self.focus_failures = 0
 
+    def park_cursor(self) -> None:
+        """Aparta el puntero del borde superior: apoyado ahi, macOS despliega la barra
+        de menus sobre el kiosco (lo deja asi el escritorio remoto o un roce del raton)."""
+        script = (
+            'ObjC.import("AppKit"); ObjC.import("CoreGraphics"); '
+            '(function () { '
+            'var frame = $.NSScreen.mainScreen.frame; '
+            'var fromTop = frame.size.height - $.NSEvent.mouseLocation.y; '
+            'if (fromTop > 2) { return "lejos"; } '
+            '$.CGWarpMouseCursorPosition({x: frame.size.width - 2, y: frame.size.height - 2}); '
+            'return "apartado"; '
+            '})()'
+        )
+        if command(["/usr/bin/osascript", "-l", "JavaScript", "-e", script], timeout=5) == "apartado":
+            LOG.info("Puntero apartado del borde superior")
+
     def tick(self) -> None:
         """Evalúa una actualización, la salud de los servicios y el estado del kiosco."""
         if os.fstat(self.output.fileno()).st_size > 5_000_000:
@@ -392,6 +408,7 @@ class Supervisor:
             self.chrome = None
         elif self.chrome is not None or self.reloaded:
             self.recover_browser()
+            self.park_cursor()
 
     def run(self) -> None:
         """Supervisa hasta recibir una señal de salida de launchd o del usuario."""

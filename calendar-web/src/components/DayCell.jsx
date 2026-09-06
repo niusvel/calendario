@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { eventsOnDay, evStart, fmtTime, sameDay, isVacationEvent } from "../lib/dates.js";
-import VacationShade from "./VacationShade.jsx";
+import DayShade from "./DayShade.jsx";
 import { chip } from "../lib/colors.js";
 
 // Celda de un dia con su lista de eventos. Mide el desbordamiento real en vez de
@@ -22,9 +22,12 @@ export default function DayCell({
   useEffect(() => setCount(sorted.length), [sorted.length]);
   useLayoutEffect(() => {
     const el = listRef.current;
-    // Si ni una sola etiqueta cabe entera, se baja a cero y el dia queda resumido
-    // en el contador: preferible a un titulo cortado por la mitad.
-    if (el && el.scrollHeight > el.clientHeight + 1 && count > 0) setCount((current) => Math.max(0, current - 1));
+    // Sin barras la celda ensena siempre al menos una etiqueta, aunque roce el
+    // borde. Con barras el sitio es escaso y la etiqueta puede ceder al contador:
+    // mejor "+1 mas" que un titulo cortado por la mitad. Un contenedor sin altura
+    // aun no esta medido, no esta lleno.
+    const floor = laneCount > 0 ? 0 : 1;
+    if (el && el.clientHeight > 0 && el.scrollHeight > el.clientHeight + 1 && count > floor) setCount((current) => Math.max(floor, current - 1));
   });
   useEffect(() => {
     const el = listRef.current;
@@ -46,7 +49,7 @@ export default function DayCell({
       className={"mf-cell" + (weekend ? " mf-weekend" : "") + (muted ? " mf-out" : "") + (sameDay(day, now) ? " mf-today" : "")}
       style={{ "--mf-lanes": laneCount }}
     >
-      <VacationShade day={day} events={events} />
+      <DayShade day={day} events={events} />
       <div className="mf-num tabular">{label ?? day.getDate()}</div>
       <div className="mf-events" ref={listRef} data-lanes={laneCount}>
         {shown.map((ev) => (

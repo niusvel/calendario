@@ -60,7 +60,10 @@ def load_config() -> None:
         )
     CONFIG = yaml.safe_load(CONFIG_PATH.read_text(encoding="utf-8")) or {}
     CALENDARS = [
-        CalendarConfig(name=c["name"], color=_normalize_color(c.get("color")), url=c["url"])
+        CalendarConfig(
+            name=c["name"], color=_normalize_color(c.get("color")), url=c["url"],
+            include_locations=tuple(c.get("include_locations") or ()),
+        )
         for c in CONFIG.get("calendars", [])
     ]
     if not CALENDARS:

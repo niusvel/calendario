@@ -26,6 +26,9 @@ class CalendarConfig:
     name: str
     color: str
     url: str
+    # Feeds compartidos, como el calendario laboral de Euskadi, mezclan los
+    # festivos de cientos de municipios: solo entran los de estas localidades.
+    include_locations: tuple[str, ...] = ()
 
 
 def _to_https(url: str) -> str:
@@ -59,6 +62,12 @@ def _normalize_event(component, cal: CalendarConfig) -> dict:
     end = dtend_prop.dt if dtend_prop is not None else None
 
     all_day = isinstance(start, dt.date) and not isinstance(start, dt.datetime)
+    # Algunos feeds oficiales marcan un dia entero con una hora simbolica
+    # (00:00:01) y sin DTEND; la expansion lo deja con fin igual al inicio.
+    # Es un dia, no una cita a medianoche.
+    if not all_day and (end is None or end == start) and (start.hour, start.minute) == (0, 0):
+        all_day = True
+        start = start.date()
 
     if all_day:
         start_date = start
@@ -119,8 +128,21 @@ def parse_and_expand(
     events: list[dict] = []
     for comp in occurrences:
         try:
-            events.append(_normalize_event(comp, cal))
+            event = _normalize_event(comp, cal)
         except Exception:
             # Un evento malformado no debe tumbar el feed entero.
             continue
+        if _wanted_location(event["location"], cal.include_locations):
+            events.append(event)
     return events
+
+
+def _wanted_location(location: "str | None", wanted: tuple[str, ...]) -> bool:
+    """Sin filtro entra todo; con filtro basta con que la localidad contenga uno
+    de los nombres, sin distinguir mayusculas ("Bizkaia / Bizkaia" ~ "bizkaia")."""
+    if not wanted:
+        return True
+    if not location:
+        return False
+    text = location.casefold()
+    return any(name.casefold() in text for name in wanted)
