@@ -5,7 +5,7 @@
 // un emoji, se respeta y no se anade otro.
 export const STICKERS = [
   ["🎂", ["cumple", "cumpleaños", "aniversario", "urtebetetze"]],
-  ["💇", ["peluquer", "pelu ", "corte de pelo", "barber", "ile apain"]],
+  ["✂️", ["peluquer", "pelu ", "corte de pelo", "barber", "ile apain"]],
   ["🦷", ["dentista", "dental", "ortodoncia", "hortz"]],
   ["👓", ["oftalm", "oculista", "optica", "óptica", "gafas"]],
   ["🩺", ["medic", "médic", "doctor", "pediatr", "consulta", "hospital", "ambulatorio", "osakidetza", "analitica", "analítica", "vacuna", "fisio", "revision", "revisión"]],

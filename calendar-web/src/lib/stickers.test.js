@@ -3,7 +3,7 @@ import test from "node:test";
 import { stickerFor } from "./stickers.js";
 
 test("reconoce el tipo de evento por el titulo, sin tildes ni mayusculas", () => {
-  assert.equal(stickerFor("Cita peluquería Patxi"), "💇");
+  assert.equal(stickerFor("Cita peluquería Patxi"), "✂️");
   assert.equal(stickerFor("DENTISTA Naiara"), "🦷");
   assert.equal(stickerFor("Oftalmólogo niños"), "👓");
   assert.equal(stickerFor("Cumple Baldio"), "🎂");

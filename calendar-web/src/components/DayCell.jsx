@@ -1,8 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { eventsOnDay, evStart, fmtTime, sameDay, isVacationEvent, isHolidayEvent } from "../lib/dates.js";
-import EventTitle from "./EventTitle.jsx";
+import { eventsOnDay, evStart, sameDay, isVacationEvent, isHolidayEvent } from "../lib/dates.js";
+import EventPill from "./EventPill.jsx";
 import DayShade from "./DayShade.jsx";
-import { chip } from "../lib/colors.js";
 
 // Celda de un dia con su lista de eventos. Mide el desbordamiento real en vez de
 // suponer cuantos caben: si la lista no entra, muestra uno menos y lo suma al
@@ -54,12 +53,7 @@ export default function DayCell({
       <DayShade day={day} events={events} />
       <div className="mf-num tabular">{label ?? day.getDate()}</div>
       <div className="mf-events" ref={listRef} data-lanes={laneCount}>
-        {shown.map((ev) => (
-          <div key={ev.id} className="day-pill" style={chip(ev.color)}>
-            {showTime && !ev.all_day && <span className="day-pill-time tabular">{fmtTime(evStart(ev))}</span>}
-            <span className="day-pill-title"><EventTitle title={ev.title} /></span>
-          </div>
-        ))}
+        {shown.map((ev) => <EventPill key={ev.id} event={ev} showTime={showTime} />)}
         {extra > 0 && <div className="day-more">+{extra} más</div>}
       </div>
     </div>

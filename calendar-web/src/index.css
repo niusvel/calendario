@@ -247,13 +247,16 @@ body {
 .day-pill {
   flex-shrink: 0;            /* no encoger: si no caben, las recorta el truncado medido (no se aplastan los titulos) */
   border-radius: 7px; padding: 0.3rem 0.5rem;
-  display: flex; flex-direction: row; align-items: baseline; gap: 0.4rem;
+  /* Columna lateral (hora y pegatina) + titulo a toda altura. */
+  display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 0.45rem; align-items: start;
   overflow: hidden;
 }
-.day-pill-time { font-size: 0.95rem; font-weight: 700; flex-shrink: 0; opacity: 0.75; }
+.day-pill-side { display: flex; flex-direction: column; align-items: center; gap: 0.05rem; }
+.day-pill-side .sticker { font-size: 1.5rem; margin: 0; line-height: 1.1; }
+.day-pill-time { font-size: 0.95rem; font-weight: 700; opacity: 0.75; line-height: 1.2; }
 .day-pill-title {
   font-size: 1.25rem; font-weight: 700; line-height: 1.15;
-  flex: 1 1 auto; min-width: 0;
+  min-width: 0;
   /* Tres lineas antes de recortar: la celda casi siempre tiene sitio debajo. */
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
   overflow: hidden; overflow-wrap: anywhere;
@@ -350,6 +353,7 @@ body {
 }
 /* Etiquetas mas ajustadas: en filas con barras se juega con muy pocos pixeles. */
 .roll .day-pill { padding: 0.15rem 0.45rem; }
+.roll .day-pill-side .sticker { font-size: 1.15rem; }   /* no mas alto que una linea de titulo */
 .roll .mf-cell:last-child { border-right: 0; }
 .roll .mf-weekend { background: var(--color-weekend); }
 .roll .mf-today { box-shadow: inset 0 0 0 2px var(--color-now); }
