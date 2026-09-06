@@ -8,7 +8,7 @@ import { chip } from "../lib/colors.js";
 // suponer cuantos caben: si la lista no entra, muestra uno menos y lo suma al
 // contador. La comparten la vista de mes y la de semanas consecutivas.
 export default function DayCell({
-  day, now, events, multiDayIds, hidden = 0, laneCount = 0, muted = false, label, cellRef,
+  day, now, events, multiDayIds, hidden = 0, laneCount = 0, muted = false, label, cellRef, showTime = true,
 }) {
   const sorted = eventsOnDay(events, day)
     // Vacaciones y festivos ya tinen el dia: no necesitan etiqueta.
@@ -56,7 +56,7 @@ export default function DayCell({
       <div className="mf-events" ref={listRef} data-lanes={laneCount}>
         {shown.map((ev) => (
           <div key={ev.id} className="day-pill" style={chip(ev.color)}>
-            {!ev.all_day && <span className="day-pill-time tabular">{fmtTime(evStart(ev))}</span>}
+            {showTime && !ev.all_day && <span className="day-pill-time tabular">{fmtTime(evStart(ev))}</span>}
             <span className="day-pill-title"><EventTitle title={ev.title} /></span>
           </div>
         ))}

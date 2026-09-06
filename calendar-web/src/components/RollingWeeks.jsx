@@ -98,6 +98,7 @@ export default function RollingWeeks({ now, events }) {
                       multiDayIds={multiDayIds}
                       hidden={hiddenByDay.get(day.getTime()) || 0}
                       muted={day < today}
+                      showTime={false}
                       laneCount={laneCount}
                       // El 1 lleva el mes al lado: la numeracion es seguida y el
                       // cambio de mes puede caer a mitad de fila, sin linea gruesa.

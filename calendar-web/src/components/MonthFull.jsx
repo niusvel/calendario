@@ -70,6 +70,7 @@ export default function MonthFull({ now, events }) {
             multiDayIds={multiDayIds}
             hidden={hiddenByDay.get(cell.date.getTime()) || 0}
             muted={!cell.inMonth}
+            showTime={false}
             laneCount={Math.min(MAX_LANES, Math.max(0, ...barsByWeek[Math.floor(index / 7)].map((bar) => bar.lane + 1)))}
           />
         ))}
