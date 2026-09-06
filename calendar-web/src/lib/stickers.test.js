@@ -11,6 +11,13 @@ test("reconoce el tipo de evento por el titulo, sin tildes ni mayusculas", () =>
   assert.equal(stickerFor("Guateque Inauguración miraki"), "🎉");
 });
 
+test("las actividades de los ninos ganan a la palabra clase", () => {
+  assert.equal(stickerFor("Clase de baile"), "💃");
+  assert.equal(stickerFor("Clases de natación"), "🏊");
+  assert.equal(stickerFor("Karate Naiara"), "🥋");
+  assert.equal(stickerFor("Tutoría cole"), "🎒");
+});
+
 test("un emoji puesto a mano en iCloud manda", () => {
   assert.equal(stickerFor("Dentista 🐊"), null);
 });
