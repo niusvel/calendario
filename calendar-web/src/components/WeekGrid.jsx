@@ -2,21 +2,13 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { addDays, startOfDay, eventsOnDay, evStart, fmtTime, WEEKDAYS_SHORT, eventDayRange, isVacationEvent, sameDay } from "../lib/dates.js";
 import VacationShade from "./VacationShade.jsx";
 import { chip } from "../lib/colors.js";
-import { rootRem } from "../lib/layout.js";
+import { packLanes } from "../lib/lanes.js";
+import { useBarPositions } from "../lib/bars.js";
 
 const MAX_LANES = 2;
 const DAY_MS = 86_400_000;
 const HEAD_REM = 3.4;   // alto de la cabecera del dia (dia de semana + numero)
 const LANE_REM = 1.7;   // paso vertical entre carriles de barra
-function packLanes(items) {
-  const laneEnds = [];
-  return [...items].sort((a, b) => a.startCol - b.startCol || a.endCol - b.endCol).map((item) => {
-    let lane = laneEnds.findIndex((end) => end < item.startCol);
-    if (lane === -1) lane = laneEnds.length;
-    laneEnds[lane] = item.endCol;
-    return { ...item, lane };
-  });
-}
 
 function DayColumn({ day, events, isWeekend, compact, laneCount, multiDayIds, columnRef }) {
   const sorted = events.filter((event) => !multiDayIds.has(event.id) && !isVacationEvent(event)).sort((a, b) => (a.all_day === b.all_day ? evStart(a) - evStart(b) : a.all_day ? -1 : 1));
@@ -46,7 +38,6 @@ function DayColumn({ day, events, isWeekend, compact, laneCount, multiDayIds, co
 export default function WeekGrid({ now, events }) {
   const gridRef = useRef(null);
   const columnRefs = useRef([]);
-  const [barPositions, setBarPositions] = useState({});
   const start = addDays(startOfDay(now), 1);
   const end = addDays(start, 6);
   const days = Array.from({ length: 7 }, (_, i) => addDays(start, i));
@@ -67,32 +58,10 @@ export default function WeekGrid({ now, events }) {
   const template = cols.map((_, index) => compact[index] ? "var(--day-col-compact-w, 3.2rem)" : "minmax(0, 1fr)").join(" ");
   const layoutKey = bars.map((bar) => `${bar.id}:${bar.startCol}:${bar.endCol}:${bar.lane}`).join("|");
 
-  useLayoutEffect(() => {
-    const measure = () => {
-      const grid = gridRef.current;
-      if (!grid) return;
-      const gridBox = grid.getBoundingClientRect();
-      const rem = rootRem();
-      const next = {};
-      bars.forEach((bar) => {
-        const first = columnRefs.current[bar.startCol];
-        const last = columnRefs.current[bar.endCol];
-        if (!first || !last) return;
-        const a = first.getBoundingClientRect();
-        const b = last.getBoundingClientRect();
-        next[bar.id] = {
-          left: a.left - gridBox.left,
-          width: b.right - a.left,
-          top: rem * HEAD_REM + bar.lane * rem * LANE_REM,
-        };
-      });
-      setBarPositions(next);
-    };
-    measure();
-    const observer = window.ResizeObserver ? new ResizeObserver(measure) : null;
-    if (observer && gridRef.current) observer.observe(gridRef.current);
-    return () => observer?.disconnect();
-  }, [layoutKey, template]);
+  const barPositions = useBarPositions({
+    gridRef, cellRefs: columnRefs, rows: [bars], columns: 7,
+    headRem: HEAD_REM, laneRem: LANE_REM, layoutKey: `${layoutKey}|${template}`,
+  });
   return <section className="panel reveal flex flex-col h-full" style={{ animationDelay: "120ms" }}>
     <div className="panel-title">Próximos 7 días</div>
     <div ref={gridRef} className="week-grid flex-1" style={{ gridTemplateColumns: template }}>

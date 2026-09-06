@@ -53,7 +53,7 @@ export default function Header({ now, calendars, status, lastUpdated, view = 1 }
             {capFirst(fmtLongDate(now))}
           </div>
           {view === 2 && <div className="view-tag">Vista 2 · mes completo</div>}
-          {view === 3 && <div className="view-tag">Vista 3 · 3 meses</div>}
+          {view === 3 && <div className="view-tag">Vista 3 · próximas semanas</div>}
         </div>
       </div>
 

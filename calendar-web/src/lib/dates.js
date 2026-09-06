@@ -201,14 +201,17 @@ export function layoutLanes(events) {
 // --- Vista 2: ano linear -------------------------------------------------
 
 // Numero de dias del mes (month: 0-11).
-export function daysInMonth(year, month) {
-  return new Date(year, month + 1, 0).getDate();
+// Lunes de la semana a la que pertenece la fecha (semanas lunes-primero).
+export function mondayOf(d) {
+  const day = startOfDay(d);
+  return addDays(day, -((day.getDay() + 6) % 7));
 }
 
-// Offset lunes-primero del dia 1 del mes (0=lunes ... 6=domingo). Determina en
-// que columna empieza el mes para alinear los dias de semana entre meses.
-export function mondayOffset(year, month) {
-  return (new Date(year, month, 1).getDay() + 6) % 7;
+// Semanas consecutivas de siete dias a partir de un lunes. A diferencia de
+// monthMatrix no se corta por meses: la numeracion sigue de largo.
+export function weeksFrom(firstMonday, total) {
+  return Array.from({ length: total }, (_, week) =>
+    Array.from({ length: 7 }, (_, day) => addDays(firstMonday, week * 7 + day)));
 }
 
 // Rango de dias [primero, ultimo] (Date a medianoche local, AMBOS inclusive) que

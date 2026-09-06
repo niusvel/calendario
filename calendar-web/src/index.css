@@ -308,67 +308,58 @@ body {
   color: var(--color-now); font-weight: 600; margin-top: 0.15rem;
 }
 
-/* ---- Vista 3: tres meses (mes actual + 2 siguientes) ---- */
+/* ---- Vista 3: semanas consecutivas ----
+   Rejilla continua al estilo del calendario de pared de papel: la numeracion no
+   se corta por meses y el cambio de mes se marca con una linea gruesa mas el
+   nombre en el margen. Reutiliza la celda y las etiquetas de la vista de mes. */
 
-.year {
+.roll {
   flex: 1; min-height: 0; overflow: hidden;
   display: flex; flex-direction: column;
   padding: 0 1.6rem 1.2rem;
-  --year-label-w: 3rem;
-  --year-num-h: 1.35rem;    /* franja del numero arriba de la celda */
-  --year-lane-h: 1.55rem;   /* alto de cada carril de barra de evento (con texto) */
+  --roll-gutter-w: 3.4rem;
+  --roll-head: 1.75rem;   /* numero del dia + su margen */
+  --roll-lane: 1.5rem;    /* paso vertical entre carriles de barra */
 }
-.year .panel-title { margin: 0.3rem 0 0.6rem; }
+.roll .panel-title { margin: 0.3rem 0 0.5rem; }
 
-.year-head { display: flex; height: 1.3rem; flex: 0 0 auto; }
-.year-body { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
-.year-row { display: flex; flex: 1 1 0; min-height: 0; }
+.roll-head { display: flex; flex: 0 0 auto; height: 1.6rem; }
+.roll-body { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
+.roll-row { display: flex; flex: 1 1 0; min-height: 0; }
 
-.year-label { width: var(--year-label-w); flex: 0 0 auto; display: flex; align-items: center; }
-.year-month {
+.roll-gutter { width: var(--roll-gutter-w); flex: 0 0 auto; display: flex; align-items: center; }
+.roll-month-name {
   font-family: var(--font-display); font-weight: 700; text-transform: uppercase;
-  font-size: 1.15rem; letter-spacing: 0.03em; color: var(--color-dim);
+  font-size: 1.15rem; letter-spacing: 0.04em; color: var(--color-dim);
 }
 
-.year-track { position: relative; flex: 1 1 0; min-width: 0; overflow: hidden; }
-/* borde fuerte = separacion entre meses; sub-fila inferior con linea tenue */
-.year-row-first .year-track { border-top: 1px solid var(--color-line-strong); }
-.year-row:not(.year-row-first) .year-track { border-top: 1px solid var(--color-line); }
-.year-head .year-track { border-top: none; }
-.year-grid { position: absolute; inset: 0; display: grid; }
+.roll-track { position: relative; flex: 1 1 0; min-width: 0; }
+.roll-grid { height: 100%; display: grid; grid-template-columns: repeat(7, 1fr); }
+.roll-dow { display: flex; align-items: center; justify-content: center; color: var(--color-dim); font-size: 1rem; }
 
-.year-dow {
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.9rem; color: var(--color-dim);
-}
-.year-dow.year-weekend { color: var(--color-now); }
+/* Linea fina entre semanas; gruesa donde empieza un mes. */
+.roll-row .roll-track, .roll-row .roll-gutter { border-top: 1px solid var(--color-line); }
+.roll-month .roll-track, .roll-month .roll-gutter { border-top: 3px solid var(--color-line-strong); }
 
-.year-cell {
-  position: relative;
+/* La celda pierde el aspecto de tarjeta: aqui la rejilla es continua. */
+.roll .mf-cell {
+  background: none; border: 0; border-radius: 0;
   border-right: 1px solid var(--color-line);
-  overflow: hidden;
+  /* El hueco inferior deja libre la cinta de vacaciones. */
+  padding: 0.2rem 0.35rem 0.5rem;
 }
-.year-weekend { background: var(--color-weekend); }
-.year-cell-out { background: var(--color-out); }
-.year-num {
-  position: absolute; z-index: 1; top: 2px; left: 4px;
-  font-size: 1.05rem; line-height: 1; color: var(--color-dim); font-weight: 600;
-}
-.year-today { box-shadow: inset 0 0 0 2px var(--color-now); }
-.year-today .year-num { color: var(--color-text); font-weight: 700; }
-
-.year-bar {
-  position: absolute;
-  height: calc(var(--year-lane-h) - 3px);
-  border-radius: 4px;
-  display: flex; align-items: center;
-  padding: 0 0.3rem;
-  overflow: hidden;
-}
-.year-bar-label {
-  font-size: 1rem; font-weight: 700; line-height: 1;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
+/* Etiquetas mas ajustadas: en filas con barras se juega con muy pocos pixeles. */
+.roll .day-pill { padding: 0.15rem 0.45rem; }
+.roll .mf-cell:last-child { border-right: 0; }
+.roll .mf-weekend { background: var(--color-weekend); }
+.roll .mf-today { box-shadow: inset 0 0 0 2px var(--color-now); }
+.roll .mf-num { font-size: 1.25rem; margin-bottom: 0.15rem; }
+.roll .mf-events { margin-top: calc(var(--mf-lanes, 0) * var(--roll-lane)); }
+.roll .day-pill-title { font-size: 1.15rem; -webkit-line-clamp: 2; }
+/* Si la semana ya gasta altura en barras, la etiqueta se conforma con una linea. */
+.roll .mf-events:not([data-lanes="0"]) .day-pill-title { -webkit-line-clamp: 1; }
+.roll .mf-bar { height: 1.4rem; font-size: 1.05rem; }
+.roll .mf-bar-label { font-size: 1.05rem; }
 
 /* ---- Vista 2: mes completo ---- */
 
@@ -423,7 +414,6 @@ body {
   pointer-events: none;
   z-index: 2;
 }
-.year-cell .vacation-band { height: 0.3rem; left: 0; right: 0; bottom: 0; }
 
 .mf-bar {
   position: absolute;

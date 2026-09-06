@@ -8,7 +8,7 @@ import KioskShortcut from "./components/KioskShortcut.jsx";
 import TodayTimeline from "./components/TodayTimeline.jsx";
 import WeekGrid from "./components/WeekGrid.jsx";
 import MiniMonth from "./components/MiniMonth.jsx";
-import QuarterView from "./components/QuarterView.jsx";
+import RollingWeeks, { rollingRange } from "./components/RollingWeeks.jsx";
 import MonthFull from "./components/MonthFull.jsx";
 
 const REFRESH_MS = 60_000;        // re-consulta al backend cada minuto
@@ -26,12 +26,13 @@ export default function App() {
 
   async function load() {
     const today = startOfDay(new Date());
-    // from: inicio del mes actual - 7 (cubre el mini-mes y la Vista 1).
-    const from = addDays(new Date(today.getFullYear(), today.getMonth(), 1), -7);
-    // to: la Vista 3 muestra mes actual + 2 siguientes -> ultimo dia de (mes+2).
-    const quarterEnd = new Date(today.getFullYear(), today.getMonth() + 3, 0);
+    // La ventana debe cubrir a la vez el mini-mes, los proximos 7 dias y las
+    // semanas consecutivas de la Vista 3, que empiezan antes del mes en curso.
+    const [rollFrom, rollTo] = rollingRange(today);
+    const monthFrom = addDays(new Date(today.getFullYear(), today.getMonth(), 1), -7);
+    const from = rollFrom < monthFrom ? rollFrom : monthFrom;
     const v1to = addDays(today, 45);
-    const to = v1to > quarterEnd ? v1to : quarterEnd;
+    const to = v1to > rollTo ? v1to : rollTo;
     try {
       const data = await fetchEvents(from, to);
       setEvents(data.events || []);
@@ -114,7 +115,7 @@ export default function App() {
       {view === 2 ? (
         <MonthFull now={now} events={events} />
       ) : view === 3 ? (
-        <QuarterView now={now} events={events} />
+        <RollingWeeks now={now} events={events} />
       ) : (
         <main className="board">
           <div className="board-main">
