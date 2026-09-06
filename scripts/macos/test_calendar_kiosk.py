@@ -226,6 +226,23 @@ class KioskTests(unittest.TestCase):
             kiosk.Supervisor.park_cursor(supervisor)
         info.assert_not_called()
 
+    def test_unload_waits_until_launchd_has_removed_the_agent(self):
+        # bootout devuelve enseguida; `print` sigue encontrando el agente dos veces
+        # y solo despues falla, que es cuando ya se puede volver a cargar.
+        results = iter([Mock(returncode=0), Mock(returncode=0), Mock(returncode=0), Mock(returncode=1)])
+        with patch.object(kiosk.subprocess, "run", side_effect=lambda *a, **k: next(results)) as run, \
+                patch.object(kiosk.time, "sleep"):
+            kiosk.unload_agent("run")
+        self.assertEqual(run.call_args_list[0].args[0][:2], ["launchctl", "bootout"])
+        self.assertEqual(sum(1 for c in run.call_args_list if c.args[0][1] == "print"), 3)
+
+    def test_unload_gives_up_instead_of_bootstrapping_over_a_live_agent(self):
+        clock = iter([0, 0, 100, 100])
+        with patch.object(kiosk.subprocess, "run", return_value=Mock(returncode=0)), \
+                patch.object(kiosk.time, "sleep"), patch.object(kiosk.time, "monotonic", side_effect=lambda: next(clock)):
+            with self.assertRaises(RuntimeError):
+                kiosk.unload_agent("update", timeout=10)
+
     def test_missing_browser_window_is_recreated_after_three_failures(self):
         supervisor = self.supervisor()
         supervisor.chrome = Mock()

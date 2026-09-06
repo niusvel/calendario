@@ -431,6 +431,21 @@ class Supervisor:
             self.output.close()
 
 
+def unload_agent(task: str, timeout: float = 45.0) -> None:
+    """`bootout` vuelve antes de que launchd termine de retirar el agente: el supervisor
+    aun esta cerrando Chrome y la API (ExitTimeOut 30). Si se hace `bootstrap` en ese
+    hueco falla con "Input/output error" y el kiosco queda descargado. Se espera."""
+    target = f"gui/{os.getuid()}/{LABEL}.{task}"
+    subprocess.run(["launchctl", "bootout", target], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        gone = subprocess.run(["launchctl", "print", target], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
+        if gone.returncode:
+            return
+        time.sleep(1)
+    raise RuntimeError(f"El agente {task} no termina de descargarse; reintenta la instalación")
+
+
 def agent_definition(state: Path, task: str) -> dict:
     """Genera LaunchAgents con rutas absolutas y PATH explícito para Homebrew."""
     settings = read_json(state / "settings.json")
@@ -481,8 +496,7 @@ def install(state: Path, repo: Path, branch: str) -> None:
         version = prepare(state, revision)
         write_json(state / "active.json", version)
     for task in ("update", "run"):
-        subprocess.run(["launchctl", "bootout", f"gui/{os.getuid()}/{LABEL}.{task}"],
-                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
+        unload_agent(task)
     shutil.copy2(Path(__file__), state / "calendar_kiosk.py")
     agents = Path.home() / "Library/LaunchAgents"
     agents.mkdir(parents=True, exist_ok=True)

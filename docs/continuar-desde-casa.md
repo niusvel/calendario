@@ -76,16 +76,23 @@ export PATH="$(/usr/local/bin/python3 -c 'import json,pathlib;print(json.loads((
 /usr/local/opt/python@3.14/bin/python3.14 "$HOME/Documents/calendario/scripts/macos/calendar_kiosk.py" install
 ```
 
-Requiere el checkout limpio y actualizado. Si el `bootstrap` de launchctl falla con
-`Input/output error`, es una carrera con el agente anterior mientras termina: los
-agentes quedan descargados y el calendario parado. Se recupera cargándolos a mano,
-y esta vez sí funciona por SSH:
+Requiere el checkout limpio y actualizado. El instalador espera a que launchd
+retire de verdad cada agente antes de volver a cargarlo: antes `bootout` volvía en
+seguida, el `bootstrap` fallaba con `Input/output error` y el calendario quedaba
+parado (pasó dos veces). Si aun así algún agente no aparece en `launchctl list`,
+se carga a mano, y funciona por SSH:
 
 ```bash
 U=$(id -u)
 launchctl bootstrap "gui/$U" "$HOME/Library/LaunchAgents/local.family-calendar.run.plist"
 launchctl bootstrap "gui/$U" "$HOME/Library/LaunchAgents/local.family-calendar.update.plist"
 ```
+
+Para reiniciar el supervisor sin descargarlo (por ejemplo tras copiar a mano un
+`calendar_kiosk.py` nuevo al directorio administrado):
+`launchctl kickstart -k "gui/$(id -u)/local.family-calendar.run"`. Ojo: el
+supervisor recién arrancado no repone una API caída hasta que los servicios llevan
+4 minutos en marcha; un `pkill` de uvicorn justo después tarda ese tiempo en volver.
 
 ## Colores, vacaciones y festivos
 
