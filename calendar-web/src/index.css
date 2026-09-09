@@ -41,6 +41,7 @@
 
   --ink-on-now: #fffaf2;         /* texto sobre el resalte de hoy */
   --color-weekend: rgba(180, 112, 12, 0.10);
+  --color-today-bg: rgba(180, 112, 12, 0.14);
   --color-out: rgba(43, 36, 24, 0.06);
   --cell-bg: rgba(255, 255, 255, 0.55);
   --glow-1: rgba(180, 112, 12, 0.07);
@@ -65,6 +66,7 @@
 
   --ink-on-now: #1a140a;
   --color-weekend: rgba(233, 180, 76, 0.05);
+  --color-today-bg: rgba(233, 180, 76, 0.12);
   --color-out: rgba(0, 0, 0, 0.22);
   --cell-bg: rgba(245, 239, 226, 0.02);
   --glow-1: rgba(233, 180, 76, 0.10);
@@ -356,7 +358,7 @@ body {
 .roll .day-pill-side .sticker { font-size: 1.15rem; }   /* no mas alto que una linea de titulo */
 .roll .mf-cell:last-child { border-right: 0; }
 .roll .mf-weekend { background: var(--color-weekend); }
-.roll .mf-today { box-shadow: inset 0 0 0 2px var(--color-now); }
+.roll .mf-today::after { border-width: 3px; }
 .roll .mf-num { font-size: 1.25rem; margin-bottom: 0.15rem; }
 .roll .mf-events { margin-top: calc(var(--mf-lanes, 0) * var(--roll-lane)); }
 .roll .day-pill-title { font-size: 1.15rem; -webkit-line-clamp: 2; }
@@ -397,14 +399,24 @@ body {
 }
 .mf-weekend { background: var(--color-weekend); }
 .mf-out { opacity: 0.45; }
-.mf-today { box-shadow: inset 0 0 0 2px var(--color-now); border-color: transparent; }
+/* Hoy tiene que verse desde el sofa: marco grueso por encima del sombreado de
+   vacaciones (un box-shadow quedaria debajo), fondo tenido y el numero en un sello. */
+.mf-today { background: var(--color-today-bg); border-color: transparent; }
+.mf-today::after {
+  content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  border: 4px solid var(--color-now); border-radius: inherit;
+}
 .mf-num {
   position: relative; z-index: 1;
   font-family: var(--font-display); font-weight: 700; font-size: 1.6rem;
   line-height: 1; margin-bottom: 0.25rem;
 }
 .mf-out .mf-num { color: var(--color-dim); }
-.mf-today .mf-num { color: var(--color-now); }
+.mf-today .mf-num {
+  align-self: flex-start;
+  background: var(--color-now); color: var(--ink-on-now);
+  padding: 0.12em 0.5em; border-radius: 0.55em;
+}
 .mf-events { position: relative; z-index: 1; flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; gap: 0.25rem; overflow: hidden; margin-top: calc(var(--mf-lanes, 0) * 1.65rem); }
 
 /* Vacaciones y festivos: el dia entero cambia de fondo, repartido en sectores
