@@ -3,8 +3,10 @@ import {
 } from "../lib/dates.js";
 import { chip } from "../lib/colors.js";
 import EventTitle from "./EventTitle.jsx";
+import EventPill from "./EventPill.jsx";
+import { WeatherStrip, WeatherToday } from "./Weather.jsx";
 
-export default function TodayTimeline({ now, events }) {
+export default function TodayTimeline({ now, events, weather }) {
   const today = startOfDay(now);
 
   const todays = events.filter((ev) => {
@@ -37,9 +39,25 @@ export default function TodayTimeline({ now, events }) {
       ? (minutesFromStart(now) / totalMin) * 100
       : null;
 
+  // Sin citas con hora la rejilla de 08 a 22 era un vacio enorme: ese dia el
+  // panel lista lo que hay y deja el sitio al tiempo.
+  if (timed.length === 0) {
+    return (
+      <section className="panel reveal flex flex-col h-full" style={{ animationDelay: "0ms" }}>
+        <div className="panel-title">Hoy</div>
+        <div className="today-list">
+          {allDay.map((ev) => <EventPill key={ev.id} event={ev} showTime={false} />)}
+          {allDay.length === 0 && <div className="today-empty">Sin citas hoy</div>}
+        </div>
+        <WeatherToday weather={weather} />
+      </section>
+    );
+  }
+
   return (
     <section className="panel reveal flex flex-col h-full" style={{ animationDelay: "0ms" }}>
       <div className="panel-title">Hoy</div>
+      <WeatherStrip weather={weather} />
 
       {allDay.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-3">
@@ -107,11 +125,6 @@ export default function TodayTimeline({ now, events }) {
           </div>
         )}
 
-        {timed.length === 0 && allDay.length === 0 && (
-          <div className="absolute inset-0 grid place-items-center text-dim" style={{ fontSize: "1.3rem" }}>
-            Sin eventos hoy
-          </div>
-        )}
       </div>
     </section>
   );

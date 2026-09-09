@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { fetchEvents } from "./lib/api.js";
+import { fetchEvents, fetchWeather } from "./lib/api.js";
 import { addDays, startOfDay, coversDay } from "./lib/dates.js";
 import { themeFor } from "./lib/theme.js";
 import Header from "./components/Header.jsx";
@@ -12,6 +12,7 @@ import RollingWeeks, { rollingRange } from "./components/RollingWeeks.jsx";
 import MonthFull from "./components/MonthFull.jsx";
 
 const REFRESH_MS = 60_000;        // re-consulta al backend cada minuto
+const WEATHER_MS = 15 * 60_000;   // el pronostico cambia despacio
 const ROTATE_MS = 60_000;         // rota a la siguiente vista cada minuto
 const BIRTHDAY_CAL = "CUMPLES";   // calendario cuyos eventos disparan el confeti
 
@@ -19,6 +20,7 @@ export default function App() {
   const [events, setEvents] = useState([]);
   const [status, setStatus] = useState("loading"); // loading | ok | error
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [weather, setWeather] = useState(null);
   const [now, setNow] = useState(new Date());
   const [view, setView] = useState(1);              // 1 = dashboard, 2 = ano linear
   const eventsRef = useRef(events);
@@ -44,12 +46,23 @@ export default function App() {
     }
   }
 
+  async function loadWeather() {
+    try {
+      setWeather(await fetchWeather());
+    } catch {
+      // Sin red se conserva el ultimo pronostico; es solo informativo.
+    }
+  }
+
   useEffect(() => {
     load();
+    loadWeather();
     const refresh = setInterval(load, REFRESH_MS);
+    const forecast = setInterval(loadWeather, WEATHER_MS);
     const clock = setInterval(() => setNow(new Date()), 1000);
     return () => {
       clearInterval(refresh);
+      clearInterval(forecast);
       clearInterval(clock);
     };
   }, []);
@@ -119,13 +132,13 @@ export default function App() {
       ) : (
         <main className="board">
           <div className="board-main">
-            <TodayTimeline now={now} events={events} />
+            <TodayTimeline now={now} events={events} weather={weather} />
           </div>
           <div className="board-side">
             <MiniMonth now={now} events={events} />
           </div>
           <div className="board-week">
-            <WeekGrid now={now} events={events} />
+            <WeekGrid now={now} events={events} weather={weather} />
           </div>
         </main>
       )}

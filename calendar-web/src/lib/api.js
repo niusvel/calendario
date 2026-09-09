@@ -18,6 +18,15 @@ export async function fetchEvents(from, to) {
   return resp.json();
 }
 
+// Pronostico resumido del backend. Sin lugar configurado responde 404: se
+// devuelve null y la pantalla simplemente no muestra el tiempo.
+export async function fetchWeather() {
+  const resp = await fetch(`${API_BASE}/weather`, { cache: "no-store" });
+  if (resp.status === 404) return null;
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  return resp.json();
+}
+
 export async function pauseKiosk() {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 5000);

@@ -23,11 +23,12 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 import yaml
-from fastapi import FastAPI, Query, Request
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from calendar_source import CalendarConfig, LOCAL_TZ, fetch_ics, parse_and_expand
 from kiosk_control import pause_kiosk
+import weather
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("family-calendar")
@@ -41,6 +42,8 @@ LAST_GOOD: dict[str, list[dict]] = {}   # nombre -> ultima lista buena de evento
 STATUS: dict[str, dict] = {}            # nombre -> {ok, last_success, error, count}
 LAST_UPDATED: "dt.datetime | None" = None
 _refresh_task: "asyncio.Task | None" = None
+WEATHER: "dict | None" = None          # ultimo pronostico bueno
+_weather_task: "asyncio.Task | None" = None
 
 
 def _normalize_color(value: "str | None") -> str:
@@ -116,6 +119,27 @@ async def _refresh_loop() -> None:
             log.error("Error en el ciclo de refresco: %s", exc)
 
 
+async def refresh_weather_once() -> None:
+    """Descarga el pronostico si hay lugar configurado; conserva el anterior si falla."""
+    global WEATHER
+    place = CONFIG.get("weather") or {}
+    if not place.get("latitude") or not place.get("longitude"):
+        return
+    raw = await weather.fetch_forecast(float(place["latitude"]), float(place["longitude"]))
+    WEATHER = weather.summarize(raw, dt.datetime.now(LOCAL_TZ), str(place.get("name", "")))
+    log.info("OK tiempo: %s, %s°", WEATHER["place"], WEATHER["current"]["temp"])
+
+
+async def _weather_loop() -> None:
+    interval = int(CONFIG.get("weather_minutes", 30)) * 60
+    while True:
+        await asyncio.sleep(interval)
+        try:
+            await refresh_weather_once()
+        except Exception as exc:  # noqa: BLE001
+            log.warning("FALLO tiempo: %s (se mantiene el pronostico anterior)", exc)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     load_config()
@@ -123,11 +147,17 @@ async def lifespan(app: FastAPI):
         await refresh_once()  # primera carga al arrancar
     except Exception as exc:  # noqa: BLE001
         log.error("Fallo en la carga inicial: %s", exc)
-    global _refresh_task
+    try:
+        await refresh_weather_once()
+    except Exception as exc:  # noqa: BLE001
+        log.warning("Fallo en la carga inicial del tiempo: %s", exc)
+    global _refresh_task, _weather_task
     _refresh_task = asyncio.create_task(_refresh_loop())
+    _weather_task = asyncio.create_task(_weather_loop())
     yield
-    if _refresh_task:
-        _refresh_task.cancel()
+    for task in (_refresh_task, _weather_task):
+        if task:
+            task.cancel()
 
 
 app = FastAPI(title="Family Wall Calendar", lifespan=lifespan)
@@ -139,6 +169,14 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
+
+
+@app.get("/weather")
+def get_weather():
+    """Pronostico resumido; 404 si no hay lugar configurado o aun no se pudo descargar."""
+    if WEATHER is None:
+        raise HTTPException(404, "Sin pronostico: configura weather.latitude/longitude en config.yaml")
+    return WEATHER
 
 
 @app.post("/kiosk/pause")
@@ -162,7 +200,7 @@ def _public(ev: dict) -> dict:
 def root():
     return {
         "service": "Family Wall Calendar backend",
-        "endpoints": ["/events?from=YYYY-MM-DD&to=YYYY-MM-DD", "/health"],
+        "endpoints": ["/events?from=YYYY-MM-DD&to=YYYY-MM-DD", "/weather", "/health"],
         "calendars": [c.name for c in CALENDARS],
         "last_updated": LAST_UPDATED.isoformat() if LAST_UPDATED else None,
     }

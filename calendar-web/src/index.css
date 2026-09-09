@@ -449,6 +449,45 @@ body {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
+/* ---- Tiempo ---- */
+
+/* Tira de una linea sobre la rejilla de horas. */
+.wx-strip {
+  display: flex; align-items: baseline; gap: 0.7rem; flex-wrap: wrap;
+  margin: -0.3rem 0 0.6rem; font-size: 1.15rem; font-weight: 600;
+}
+.wx-icon { font-size: 1.6rem; line-height: 1; align-self: center; }
+.wx-temp { font-family: var(--font-display); font-size: 1.7rem; font-weight: 800; }
+.wx-label { color: var(--color-dim); }
+.wx-range { color: var(--color-dim); }
+.wx-rain { color: var(--color-dim); }
+
+/* Dias sin citas con hora: lista breve y el tiempo con espacio. */
+.today-list { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
+.today-list .day-pill { align-self: flex-start; max-width: 100%; }
+.today-empty { color: var(--color-dim); font-size: 1.4rem; font-weight: 600; }
+.wx-today { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: 1.4rem; }
+.wx-now { display: flex; align-items: center; gap: 1.4rem; }
+.wx-now-icon { font-size: 5.2rem; line-height: 1; }
+.wx-now-temp { font-family: var(--font-display); font-size: 4.6rem; font-weight: 800; line-height: 0.95; letter-spacing: -0.02em; }
+.wx-now-label { font-size: 1.4rem; font-weight: 600; color: var(--color-dim); margin-top: 0.3rem; }
+.wx-now-side { margin-left: auto; text-align: right; font-size: 1.35rem; font-weight: 600; line-height: 1.5; color: var(--color-dim); }
+.wx-hours { display: grid; grid-template-columns: repeat(12, 1fr); gap: 0.2rem; border-top: 1px solid var(--color-line); padding-top: 1rem; }
+.wx-hour { text-align: center; display: flex; flex-direction: column; gap: 0.15rem; }
+.wx-hour-time { font-size: 1rem; color: var(--color-dim); font-weight: 600; }
+.wx-hour-icon { font-size: 2rem; line-height: 1.2; }
+.wx-hour-temp { font-size: 1.35rem; font-weight: 700; }
+.wx-hour-rain { font-size: 1rem; color: var(--color-dim); min-height: 1.2em; }
+.wx-hour-rain.wx-wet { color: var(--color-text); font-weight: 700; }
+
+/* Tarjeta de un dia proximo: icono y maxima/minima junto al numero. */
+.wx-day { display: inline-flex; align-items: baseline; gap: 0.35rem; margin-left: auto; margin-right: 0.6rem; }
+.wx-day-icon { font-size: 1.5rem; line-height: 1; }
+.wx-day-range { font-size: 1.05rem; font-weight: 700; }
+.wx-day-min { color: var(--color-dim); font-weight: 600; }
+.day-col-compact .wx-day { margin: 0.15rem 0 0; }
+.day-col-compact .wx-day-icon { font-size: 1.25rem; }
+
 /* ---- Pegatinas ---- */
 
 /* Mas grande que el texto: es lo que se reconoce de lejos. */

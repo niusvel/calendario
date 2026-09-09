@@ -2,6 +2,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { addDays, startOfDay, eventsOnDay, evStart, fmtTime, WEEKDAYS_SHORT, eventDayRange, isVacationEvent, isHolidayEvent, sameDay } from "../lib/dates.js";
 import EventTitle from "./EventTitle.jsx";
 import EventPill from "./EventPill.jsx";
+import { WeatherDay } from "./Weather.jsx";
+import { dailyFor } from "../lib/weather.js";
 import DayShade from "./DayShade.jsx";
 import { chip } from "../lib/colors.js";
 import { packLanes } from "../lib/lanes.js";
@@ -12,7 +14,7 @@ const DAY_MS = 86_400_000;
 const HEAD_REM = 3.4;   // alto de la cabecera del dia (dia de semana + numero)
 const LANE_REM = 1.7;   // paso vertical entre carriles de barra
 
-function DayColumn({ day, events, isWeekend, compact, laneCount, multiDayIds, columnRef }) {
+function DayColumn({ day, events, isWeekend, compact, laneCount, multiDayIds, columnRef, forecast }) {
   const sorted = events.filter((event) => !multiDayIds.has(event.id) && !isVacationEvent(event) && !isHolidayEvent(event)).sort((a, b) => (a.all_day === b.all_day ? evStart(a) - evStart(b) : a.all_day ? -1 : 1));
   const listRef = useRef(null);
   const [count, setCount] = useState(sorted.length);
@@ -32,12 +34,12 @@ function DayColumn({ day, events, isWeekend, compact, laneCount, multiDayIds, co
   const extra = sorted.length - shown.length;
   return <div ref={columnRef} className={"day-col" + (isWeekend ? " day-col-weekend" : "") + (compact ? " day-col-compact" : "")} style={{ "--week-lanes": laneCount }}>
     <DayShade day={day} events={events} />
-    <div className="day-col-head"><span className="day-dow">{WEEKDAYS_SHORT[day.getDay()]}</span><span className="day-num tabular">{day.getDate()}</span></div>
+    <div className="day-col-head"><span className="day-dow">{WEEKDAYS_SHORT[day.getDay()]}</span><WeatherDay day={forecast} compact={compact} /><span className="day-num tabular">{day.getDate()}</span></div>
     {!compact && <div className="day-events" ref={listRef}>{shown.map((ev) => <EventPill key={ev.id} event={ev} />)}{extra > 0 && <div className="day-more">+{extra} más</div>}</div>}
   </div>;
 }
 
-export default function WeekGrid({ now, events }) {
+export default function WeekGrid({ now, events, weather }) {
   const gridRef = useRef(null);
   const columnRefs = useRef([]);
   const start = addDays(startOfDay(now), 1);
@@ -67,7 +69,7 @@ export default function WeekGrid({ now, events }) {
   return <section className="panel reveal flex flex-col h-full" style={{ animationDelay: "120ms" }}>
     <div className="panel-title">Próximos 7 días</div>
     <div ref={gridRef} className="week-grid flex-1" style={{ gridTemplateColumns: template }}>
-      {cols.map((column, index) => <DayColumn key={column.day.toISOString()} columnRef={(node) => { columnRefs.current[index] = node; }} {...column} compact={compact[index]} laneCount={laneCount} multiDayIds={multiDayIds} />)}
+      {cols.map((column, index) => <DayColumn key={column.day.toISOString()} columnRef={(node) => { columnRefs.current[index] = node; }} {...column} compact={compact[index]} laneCount={laneCount} multiDayIds={multiDayIds} forecast={dailyFor(weather, column.day)} />)}
       {bars.filter((bar) => bar.lane < MAX_LANES).map((bar) => <div key={bar.id} className="week-bar" title={bar.event.title} style={{ ...barPositions[bar.id], ...chip(bar.event.color) }}><span className="week-bar-label"><EventTitle title={bar.event.title} /></span></div>)}
     </div>
   </section>;

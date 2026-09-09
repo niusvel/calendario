@@ -135,6 +135,27 @@ hora simbólica `00:00:01` como día completo. Entrada en `config.yaml`:
 normalmente en primavera). Fuente: Open Data Euskadi, dataset "Calendario laboral
 de Euskadi para el 2026".
 
+## Tiempo (Vista 1)
+
+La previsión viene de Open-Meteo (gratis, sin clave) a través de `GET /weather`
+del backend, que la descarga cada 30 minutos (`weather_minutes`) y conserva la
+última buena si falla. Se activa con el lugar en `config.yaml`:
+
+```yaml
+weather:
+  name: "Donostia"
+  latitude: 43.3183
+  longitude: -1.9812
+```
+
+Sin esa clave el endpoint responde 404 y la pantalla no muestra tiempo. Los códigos
+WMO se traducen a icono y texto en `calendar-web/src/lib/weather.js`.
+
+La Vista 1 tiene dos modos: con citas con hora ese día, la rejilla de horas con una
+tira de tiempo encima (ahora, máx/mín, lluvia); sin citas con hora, una lista breve
+y el tiempo en grande con las próximas 12 horas. Las tarjetas de "Próximos 7 días"
+llevan icono y máx/mín de cada día.
+
 ## Pegatinas
 
 Cada etiqueta lleva delante un icono deducido del título (🎂 cumple, 💇 peluquería,
@@ -167,8 +188,6 @@ a menos de 2 px del borde, y la página oculta la flecha con `cursor: none`.
 Cuestiones visuales y de fechas detectadas en la revisión inicial, **todavía sin corregir**:
 
 - Indicador de actualización que no refleja bien los fallos de iCloud.
-- Rediseño de la Vista 1: el panel "Hoy" ocupa media pantalla casi siempre vacío.
-  La usuaria quiere añadir ahí el tiempo (temperatura y lluvia) cuando se aborde.
 
 Resueltos en esta sesión: comparación de `Date` por referencia (afectaba a semana y
 mes), eventos ocultos al exceder los carriles y el fin a medianoche.
