@@ -46,6 +46,12 @@ Dos trampas al usarlo, ambas encontradas en la práctica:
   Checkout en `/Users/leyanislopezavila/Documents/calendario`.
 - Python `/usr/local/bin/python3` **3.14.5**; Node **22.22.3** bajo NVM; Git **2.54.0**.
 
+En el PC de casa, si `git` responde "You have not agreed to the Xcode license", es
+que `xcode-select` apunta a Xcode.app y hay una actualización sin aceptar. Sin `sudo`
+se sortea usando las Command Line Tools solo para ese comando:
+`DEVELOPER_DIR=/Library/Developer/CommandLineTools git …` (o aceptar la licencia una
+vez con `sudo xcodebuild -license`).
+
 ## Comandos de operación
 
 Todos se ejecutan **en el Mac mini**, no en el PC de casa:
@@ -151,8 +157,15 @@ weather:
 Sin esa clave el endpoint responde 404 y la pantalla no muestra tiempo. Los códigos
 WMO se traducen a icono y texto en `calendar-web/src/lib/weather.js`.
 
-La Vista 1 tiene dos modos: con citas con hora ese día, la rejilla de horas con una
-tira de tiempo encima (ahora, máx/mín, lluvia); sin citas con hora, una lista breve
+**Qué día se enseña** (`focusDay` en `weather.js`): hasta las 18:00, hoy (por la
+mañana hace fresco pero lo que importa es la máxima); desde las 18:00, **mañana**,
+que es cuando se prepara la ropa; de madrugada vuelve a hoy. Se busca por fecha, no
+por posición, porque el pronóstico puede llevar media hora sin refrescar tras medianoche.
+
+La cabecera de las tres vistas lleva ese bloque (ahora en grande + día de interés con
+máx/mín y lluvia si pasa del 20 %), por encima de la leyenda y del estado, que se
+quedan más pequeños. La Vista 1 tiene además dos modos: con citas con hora ese día,
+la rejilla de horas con una tira de tiempo encima; sin citas con hora, una lista breve
 y el tiempo en grande con las próximas 12 horas. Las tarjetas de "Próximos 7 días"
 llevan icono y máx/mín de cada día.
 

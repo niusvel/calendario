@@ -1,28 +1,47 @@
-import { weatherIcon, fmtTemp } from "../lib/weather.js";
+import { weatherIcon, fmtTemp, focusDay } from "../lib/weather.js";
 
 // Tira compacta para cuando la rejilla de horas ocupa el panel: ahora, maxima y
 // minima y probabilidad de lluvia del dia, en una linea.
-export function WeatherStrip({ weather }) {
-  if (!weather) return null;
+export function WeatherStrip({ weather, now: clock }) {
+  const day = focusDay(weather, clock);
+  if (!weather || !day) return null;
   const now = weatherIcon(weather.current.code, weather.current.is_day);
-  const today = weather.daily[0];
   return (
     <div className="wx-strip">
       <span className="wx-icon">{now.icon}</span>
       <span className="wx-temp tabular">{fmtTemp(weather.current.temp)}</span>
       <span className="wx-label">{now.label}</span>
-      <span className="wx-range tabular">{fmtTemp(today.tmax)} / {fmtTemp(today.tmin)}</span>
-      {today.rain >= 20 && <span className="wx-rain">💧 {today.rain}%</span>}
+      <span className="wx-range tabular">{day.label} ↑{fmtTemp(day.tmax)} ↓{fmtTemp(day.tmin)}</span>
+      {day.rain >= 20 && <span className="wx-rain">💧 {day.rain}%</span>}
+    </div>
+  );
+}
+
+// Bloque de cabecera, visible en las tres vistas: el ahora en grande y, al lado,
+// el dia que importa con su maxima, minima y lluvia.
+export function WeatherHeadline({ weather, now: clock }) {
+  const day = focusDay(weather, clock);
+  if (!weather || !day) return null;
+  const now = weatherIcon(weather.current.code, weather.current.is_day);
+  const dayIcon = weatherIcon(day.code, true);
+  return (
+    <div className="wx-head" title={`${now.label}. ${day.label}: ${dayIcon.label}`}>
+      <span className="wx-head-icon">{now.icon}</span>
+      <span className="wx-head-temp tabular">{fmtTemp(weather.current.temp)}</span>
+      <span className="wx-head-day">
+        <span className="wx-head-label">{day.label} {dayIcon.icon}</span>
+        <span className="tabular">↑{fmtTemp(day.tmax)} ↓{fmtTemp(day.tmin)}{day.rain >= 20 ? ` · 💧${day.rain}%` : ""}</span>
+      </span>
     </div>
   );
 }
 
 // Panel grande para los dias sin citas con hora: el ahora en grande y las
 // proximas horas debajo, para saber si hay que salir con paraguas.
-export function WeatherToday({ weather }) {
-  if (!weather) return null;
+export function WeatherToday({ weather, now: clock }) {
+  const day = focusDay(weather, clock);
+  if (!weather || !day) return null;
   const now = weatherIcon(weather.current.code, weather.current.is_day);
-  const today = weather.daily[0];
   return (
     <div className="wx-today">
       <div className="wx-now">
@@ -32,9 +51,10 @@ export function WeatherToday({ weather }) {
           <div className="wx-now-label">{now.label}{weather.place ? ` · ${weather.place}` : ""}</div>
         </div>
         <div className="wx-now-side">
-          <div className="tabular">↑ {fmtTemp(today.tmax)}&nbsp;&nbsp;↓ {fmtTemp(today.tmin)}</div>
-          <div className="tabular">💧 {today.rain}%</div>
-          <div className="tabular">🌅 {today.sunrise}&nbsp;&nbsp;🌇 {today.sunset}</div>
+          <div className="wx-side-label">{day.label} {weatherIcon(day.code, true).icon}</div>
+          <div className="tabular">↑ {fmtTemp(day.tmax)}&nbsp;&nbsp;↓ {fmtTemp(day.tmin)}</div>
+          <div className="tabular">💧 {day.rain}%</div>
+          <div className="tabular">🌅 {day.sunrise}&nbsp;&nbsp;🌇 {day.sunset}</div>
         </div>
       </div>
       <div className="wx-hours">

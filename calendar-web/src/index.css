@@ -451,6 +451,15 @@ body {
 
 /* ---- Tiempo ---- */
 
+/* Cabecera, en las tres vistas. */
+.wx-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.15rem; }
+.wx-head-icon { font-size: 2.4rem; line-height: 1; }
+.wx-head-temp { font-family: var(--font-display); font-size: 2.4rem; font-weight: 800; line-height: 1; letter-spacing: -0.02em; }
+.wx-head-day { display: flex; flex-direction: column; align-items: flex-start; font-size: 1.1rem; font-weight: 700; line-height: 1.2; padding-left: 0.6rem; border-left: 2px solid var(--color-line-strong); }
+.wx-head-label { color: var(--color-dim); font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.wx-side-label { text-transform: uppercase; letter-spacing: 0.06em; font-size: 1rem; }
+.header-legend span[style] { width: 10px !important; height: 10px !important; }
+
 /* Tira de una linea sobre la rejilla de horas. */
 .wx-strip {
   display: flex; align-items: baseline; gap: 0.7rem; flex-wrap: wrap;

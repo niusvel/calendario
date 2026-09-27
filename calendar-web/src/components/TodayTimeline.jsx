@@ -49,7 +49,7 @@ export default function TodayTimeline({ now, events, weather }) {
           {allDay.map((ev) => <EventPill key={ev.id} event={ev} showTime={false} />)}
           {allDay.length === 0 && <div className="today-empty">Sin citas hoy</div>}
         </div>
-        <WeatherToday weather={weather} />
+        <WeatherToday weather={weather} now={now} />
       </section>
     );
   }
@@ -57,7 +57,7 @@ export default function TodayTimeline({ now, events, weather }) {
   return (
     <section className="panel reveal flex flex-col h-full" style={{ animationDelay: "0ms" }}>
       <div className="panel-title">Hoy</div>
-      <WeatherStrip weather={weather} />
+      <WeatherStrip weather={weather} now={now} />
 
       {allDay.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-3">

@@ -124,7 +124,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <Header now={now} calendars={calendars} status={status} lastUpdated={lastUpdated} view={view} />
+      <Header now={now} calendars={calendars} status={status} lastUpdated={lastUpdated} view={view} weather={weather} />
       {view === 2 ? (
         <MonthFull now={now} events={events} />
       ) : view === 3 ? (

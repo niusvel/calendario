@@ -22,6 +22,22 @@ export function weatherIcon(code, isDay = true) {
 
 export const fmtTemp = (value) => `${Math.round(value)}°`;
 
+// Que dia enseñar: hasta las 18:00 el de hoy (por la mañana hace fresco pero lo
+// que importa es la maxima); desde las 18:00, mañana, que es cuando se prepara
+// la ropa. De madrugada vuelve a ser hoy. Se busca por fecha, no por posicion,
+// porque el pronostico puede llevar media hora sin refrescarse tras medianoche.
+export const EVENING_STARTS = 18;
+
+export function focusDay(weather, now) {
+  const today = dailyFor(weather, now);
+  if (!today) return null;
+  if (now.getHours() >= EVENING_STARTS) {
+    const tomorrow = dailyFor(weather, new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1));
+    if (tomorrow) return { ...tomorrow, label: "Mañana" };
+  }
+  return { ...today, label: "Hoy" };
+}
+
 // Pronostico del dia con esa fecha local (YYYY-MM-DD), si lo hay.
 export function dailyFor(weather, day) {
   if (!weather?.daily) return null;

@@ -1,4 +1,5 @@
 import { fmtLongDate, fmtTime, fmtAgo } from "../lib/dates.js";
+import { WeatherHeadline } from "./Weather.jsx";
 
 // Capitaliza solo la primera letra (no cada palabra: en es. "miércoles 3 de junio").
 function capFirst(s) {
@@ -31,7 +32,7 @@ function StatusDot({ status, lastUpdated, now }) {
   );
 
   return (
-    <div className="flex items-center gap-2 text-dim" style={{ fontSize: "0.95rem" }}>
+    <div className="flex items-center gap-2 text-dim" style={{ fontSize: "0.85rem" }}>
       {at && <><span>Actualizado {at}</span>{sep}</>}
       <span className="flex items-center gap-1.5" style={{ letterSpacing: "0.06em" }}>
         {dot}{meta.label}
@@ -41,7 +42,7 @@ function StatusDot({ status, lastUpdated, now }) {
   );
 }
 
-export default function Header({ now, calendars, status, lastUpdated, view = 1 }) {
+export default function Header({ now, calendars, status, lastUpdated, view = 1, weather = null }) {
   const hh = String(now.getHours()).padStart(2, "0");
   const mm = String(now.getMinutes()).padStart(2, "0");
   return (
@@ -57,12 +58,14 @@ export default function Header({ now, calendars, status, lastUpdated, view = 1 }
         </div>
       </div>
 
-      <div className="flex flex-col items-end gap-2">
-        <div className="flex flex-wrap items-center justify-end gap-x-5 gap-y-1">
+      <div className="flex flex-col items-end gap-1">
+        {/* El tiempo importa mas que la leyenda: va encima y mas grande. */}
+        <WeatherHeadline weather={weather} now={now} />
+        <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-0.5 header-legend">
           {calendars.map((c) => (
             <div key={c.name} className="flex items-center gap-2">
               <span style={{ width: 12, height: 12, borderRadius: 3, background: c.color }} />
-              <span className="text-dim" style={{ fontSize: "1.05rem" }}>{c.name}</span>
+              <span className="text-dim" style={{ fontSize: "0.9rem" }}>{c.name}</span>
             </div>
           ))}
         </div>
