@@ -22,50 +22,44 @@ function StatusDot({ status, lastUpdated, now }) {
     : null;
 
   const sep = <span style={{ opacity: 0.45 }}>·</span>;
-  const dot = (
-    <span
-      style={{
-        width: 9, height: 9, borderRadius: "50%", background: meta.c,
-        boxShadow: `0 0 10px ${meta.c}`, display: "inline-block",
-      }}
-    />
-  );
-
   return (
-    <div className="flex items-center gap-2 text-dim" style={{ fontSize: "0.85rem" }}>
+    <div className="header-status text-dim">
       {at && <><span>Actualizado {at}</span>{sep}</>}
-      <span className="flex items-center gap-1.5" style={{ letterSpacing: "0.06em" }}>
-        {dot}{meta.label}
+      <span className="status-label">
+        <span className="status-dot" style={{ background: meta.c, boxShadow: `0 0 10px ${meta.c}` }} />
+        {meta.label}
       </span>
       {ago && <>{sep}<span>hace {ago}</span></>}
     </div>
   );
 }
 
+// Tres zonas a lo ancho de la pantalla: reloj y fecha, el tiempo en el centro y,
+// a la derecha, la leyenda de calendarios con el estado debajo.
 export default function Header({ now, calendars, status, lastUpdated, view = 1, weather = null }) {
   const hh = String(now.getHours()).padStart(2, "0");
   const mm = String(now.getMinutes()).padStart(2, "0");
   return (
-    <header className="flex items-end justify-between px-8 pt-6 pb-4">
-      <div className="flex items-baseline gap-5">
+    <header className="header">
+      <div className="header-left">
         <div className="clock tabular">{hh}<span className="clock-colon">:</span>{mm}</div>
         <div className="leading-tight">
-          <div className="font-display" style={{ fontSize: "1.7rem", fontWeight: 700, letterSpacing: "-0.01em" }}>
-            {capFirst(fmtLongDate(now))}
-          </div>
+          <div className="font-display header-date">{capFirst(fmtLongDate(now))}</div>
           {view === 2 && <div className="view-tag">Vista 2 · mes completo</div>}
           {view === 3 && <div className="view-tag">Vista 3 · próximas semanas</div>}
         </div>
       </div>
 
-      <div className="flex flex-col items-end gap-1">
-        {/* El tiempo importa mas que la leyenda: va encima y mas grande. */}
+      <div className="header-center">
         <WeatherHeadline weather={weather} now={now} />
-        <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-0.5 header-legend">
+      </div>
+
+      <div className="header-right">
+        <div className="header-legend">
           {calendars.map((c) => (
-            <div key={c.name} className="flex items-center gap-2">
-              <span style={{ width: 12, height: 12, borderRadius: 3, background: c.color }} />
-              <span className="text-dim" style={{ fontSize: "0.9rem" }}>{c.name}</span>
+            <div key={c.name} className="legend-item">
+              <span className="legend-swatch" style={{ background: c.color }} />
+              <span className="legend-name">{c.name}</span>
             </div>
           ))}
         </div>

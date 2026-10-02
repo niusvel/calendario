@@ -146,6 +146,25 @@ body {
 
 /* ---- Header ---- */
 
+/* Tres zonas a lo ancho: izquierda reloj y fecha, centro el tiempo, derecha la
+   leyenda y el estado. Antes todo se apilaba en la esquina derecha. */
+.header {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: end; column-gap: 2rem;
+  padding: 1.4rem 2rem 1rem;
+}
+.header-left { display: flex; align-items: baseline; gap: 1.25rem; }
+.header-date { font-size: 1.7rem; font-weight: 700; letter-spacing: -0.01em; }
+.header-center { display: flex; justify-content: center; }
+.header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 0.4rem; }
+.header-legend { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.25rem 1.1rem; }
+.legend-item { display: inline-flex; align-items: center; gap: 0.45rem; }
+.legend-swatch { width: 12px; height: 12px; border-radius: 3px; flex: 0 0 auto; }
+.legend-name { color: var(--color-dim); font-size: 0.95rem; letter-spacing: 0.02em; }
+.header-status { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; }
+.status-label { display: inline-flex; align-items: center; gap: 0.4rem; letter-spacing: 0.06em; }
+.status-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+
 .clock {
   font-family: var(--font-display);
   font-weight: 800;
@@ -452,13 +471,12 @@ body {
 /* ---- Tiempo ---- */
 
 /* Cabecera, en las tres vistas. */
-.wx-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.15rem; }
-.wx-head-icon { font-size: 2.4rem; line-height: 1; }
-.wx-head-temp { font-family: var(--font-display); font-size: 2.4rem; font-weight: 800; line-height: 1; letter-spacing: -0.02em; }
-.wx-head-day { display: flex; flex-direction: column; align-items: flex-start; font-size: 1.1rem; font-weight: 700; line-height: 1.2; padding-left: 0.6rem; border-left: 2px solid var(--color-line-strong); }
-.wx-head-label { color: var(--color-dim); font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.wx-head { display: flex; align-items: center; gap: 0.9rem; }
+.wx-head-icon { font-size: 3.1rem; line-height: 1; }
+.wx-head-temp { font-family: var(--font-display); font-size: 3.1rem; font-weight: 800; line-height: 1; letter-spacing: -0.02em; }
+.wx-head-day { display: flex; flex-direction: column; align-items: flex-start; font-size: 1.3rem; font-weight: 700; line-height: 1.25; padding-left: 0.9rem; border-left: 2px solid var(--color-line-strong); }
+.wx-head-label { color: var(--color-dim); font-size: 1rem; text-transform: uppercase; letter-spacing: 0.06em; }
 .wx-side-label { text-transform: uppercase; letter-spacing: 0.06em; font-size: 1rem; }
-.header-legend span[style] { width: 10px !important; height: 10px !important; }
 
 /* Tira de una linea sobre la rejilla de horas. */
 .wx-strip {
