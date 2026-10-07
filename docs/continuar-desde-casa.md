@@ -169,6 +169,18 @@ la rejilla de horas con una tira de tiempo encima; sin citas con hora, una lista
 y el tiempo en grande con las próximas 12 horas. Las tarjetas de "Próximos 7 días"
 llevan icono y máx/mín de cada día.
 
+## Las tres vistas, escalonadas
+
+- **Vista 1**: hoy y los próximos 7 días con detalle (hora, pegatina, título) y el tiempo.
+- **Vista 2**: el mes en curso con etiquetas de título (sin hora).
+- **Vista 3**: 18 semanas seguidas (la pasada, la actual y cuatro meses por delante),
+  **solo iconos**: cada evento es un círculo del color de su calendario con su pegatina
+  dentro, o la inicial del título si no tiene. Los de varios días salen en cada día que
+  cubren; vacaciones y festivos tiñen el fondo y no llevan círculo. Si hay más de cinco,
+  el último hueco es "+N". Antes enseñaba 8 semanas con títulos y se solapaba con la del
+  mes. Número de semanas: `TOTAL_WEEKS` en `RollingWeeks.jsx`; lógica de iconos en
+  `lib/icons.js`.
+
 ## Pegatinas
 
 Cada etiqueta lleva delante un icono deducido del título (🎂 cumple, 💇 peluquería,

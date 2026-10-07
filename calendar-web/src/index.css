@@ -342,8 +342,6 @@ body {
   display: flex; flex-direction: column;
   padding: 0 1.6rem 1.2rem;
   --roll-gutter-w: 3.4rem;
-  --roll-head: 1.75rem;   /* numero del dia + su margen */
-  --roll-lane: 1.5rem;    /* paso vertical entre carriles de barra */
 }
 .roll .panel-title { margin: 0.3rem 0 0.5rem; }
 
@@ -372,19 +370,23 @@ body {
   /* El hueco inferior deja libre la cinta de vacaciones. */
   padding: 0.2rem 0.35rem 0.5rem;
 }
-/* Etiquetas mas ajustadas: en filas con barras se juega con muy pocos pixeles. */
-.roll .day-pill { padding: 0.15rem 0.45rem; }
-.roll .day-pill-side .sticker { font-size: 1.15rem; }   /* no mas alto que una linea de titulo */
 .roll .mf-cell:last-child { border-right: 0; }
 .roll .mf-weekend { background: var(--color-weekend); }
 .roll .mf-today::after { border-width: 3px; }
 .roll .mf-num { font-size: 1.25rem; margin-bottom: 0.15rem; }
-.roll .mf-events { margin-top: calc(var(--mf-lanes, 0) * var(--roll-lane)); }
-.roll .day-pill-title { font-size: 1.15rem; -webkit-line-clamp: 2; }
-/* Si la semana ya gasta altura en barras, la etiqueta se conforma con una linea. */
-.roll .mf-events:not([data-lanes="0"]) .day-pill-title { -webkit-line-clamp: 1; }
-.roll .mf-bar { height: 1.4rem; font-size: 1.05rem; }
-.roll .mf-bar-label { font-size: 1.05rem; }
+
+/* Variante densa: numero a la izquierda y, en la misma linea, un circulo por
+   evento con la pegatina dentro. Dieciocho filas de unos 50 px. */
+.roll-dense .mf-cell { flex-direction: row; align-items: center; gap: 0.4rem; padding: 0.15rem 0.4rem 0.15rem 0.35rem; }
+.roll-dense .mf-num { margin: 0; font-size: 1.1rem; min-width: 1.7em; }
+.roll-dense .mf-today .mf-num { padding: 0.08em 0.45em; }
+.ic-row { display: flex; align-items: center; gap: 0.22rem; min-width: 0; overflow: hidden; position: relative; z-index: 1; }
+.ic {
+  flex: 0 0 auto; width: 1.75rem; height: 1.75rem; border-radius: 50%;
+  display: grid; place-items: center; font-size: 1.05rem; line-height: 1; font-weight: 700;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
+}
+.ic-more { background: var(--color-surface-2); color: var(--color-dim); font-size: 0.85rem; box-shadow: inset 0 0 0 1px var(--color-line-strong); }
 
 /* ---- Vista 2: mes completo ---- */
 
